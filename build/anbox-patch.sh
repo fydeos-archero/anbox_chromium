@@ -1,5 +1,11 @@
 #!/bin/bash
 
+cd ./src/third_party/boost
+git submodule update
+cd -
+
+#########################################################33333
+
 cat > ./src/third_party/boost/BUILD.gn << EOF
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -8,6 +14,64 @@ cat > ./src/third_party/boost/BUILD.gn << EOF
 config("boost_config") {
   include_dirs = [    
     ".",        
+    "./libs/config/include",
+    "./libs/log/include",
+    "./libs/predef/include",
+    "./libs/thread/include",
+    "./libs/assert/include",
+    "./libs/system/include",
+    "./libs/parameter/include",
+    "./libs/move/include",
+    "./libs/throw_exception/include",
+    "./libs/core/include",
+    "./libs/smart_ptr/include",
+    "./libs/type_index/include",
+    "./libs/type_traits/include",
+    "./libs/filesystem/include",
+    "./libs/static_assert/include",
+    "./libs/iterator/include",
+    "./libs/date_time/include",
+    "./libs/mpl/include",
+    "./libs/utility/include",
+    "./libs/preprocessor/include",
+    "./libs/asio/include",
+    "./libs/detail/include",
+    "./libs/bind/include",
+    "./libs/io/include",
+    "./libs/functional/include",
+    "./libs/integer/include",
+    "./libs/range/include",
+    "./libs/locale/include",
+    "./libs/atomic/include",
+    "./libs/tuple/include",
+    "./libs/concept_check/include",
+    "./libs/proto/include",
+    "./libs/random/include",
+    "./libs/exception/include",
+    "./libs/optional/include",
+    "./libs/array/include",
+    "./libs/fusion/include",
+    "./libs/function/include",
+    "./libs/intrusive/include",
+    "./libs/phoenix/include",
+    "./libs/algorithm/include",
+    "./libs/spirit/include",
+    "./libs/typeof/include",
+    "./libs/lexical_cast/include",
+    "./libs/variant/include",
+    "./libs/numeric/conversion/include",
+    "./libs/math/include",
+    "./libs/foreach/include",
+    "./libs/regex/include",
+    "./libs/container/include",
+    "./libs/tokenizer/include",
+    "./libs/format/include",
+    "./libs/function_types/include",
+    "./libs/signals2/include",
+    "./libs/property_tree/include",
+    "./libs/any/include",
+    "./libs/multi_index/include",
+    "./libs/serialization/include",
   ]
 }
 
