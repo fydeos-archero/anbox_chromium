@@ -247,3 +247,7 @@
 /yasm/binaries
 /yasm/generate_files.xml
 /yasm/yasm.xml
+
+/anbox
+/boost
+/properties-cpp
