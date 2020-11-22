@@ -192,6 +192,9 @@ static_library("arc_base_utils") {
 }
 
 static_library("arc_base") {
+  configs += [ "//third_party/anbox:anbox_headers" ]
+  configs += [ "//third_party/anbox:clang_warnings" ]
+
   # TODO(hidehiko): Revisit here and move back some files to "arc"
   # on completion to move ArcSession task to ArcSessionManager.
   sources = [
@@ -214,6 +217,12 @@ static_library("arc_base") {
     "session/arc_property_util.h",
     "session/arc_session.cc",
     "session/arc_session.h",
+
+    "anbox_service_manager.h",
+    "anbox_service_manager.cc",
+    "session/anbox_session.cc",
+    "session/anbox_session.h",    
+
     "session/arc_session_impl.cc",
     "session/arc_session_impl.h",
     "session/arc_session_runner.cc",
@@ -251,6 +260,7 @@ static_library("arc_base") {
     "//mojo/public/cpp/platform",
     "//mojo/public/cpp/system",
     "//ui/aura",
+    "//third_party/anbox:anbox_sdk",
   ]
 
   public_deps = [
