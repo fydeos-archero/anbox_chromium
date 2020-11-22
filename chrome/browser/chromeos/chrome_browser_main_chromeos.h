@@ -26,6 +26,10 @@ namespace arc {
 class ArcServiceLauncher;
 }  // namespace arc
 
+namespace anbox{
+class AnboxServiceLauncher;
+}
+
 namespace policy {
 class LockToSingleUserManager;
 }  // namespace policy
@@ -139,6 +143,7 @@ class ChromeBrowserMainPartsChromeos : public ChromeBrowserMainPartsLinux {
   scoped_refptr<chromeos::ExternalMetrics> external_metrics_;
 
   std::unique_ptr<arc::ArcServiceLauncher> arc_service_launcher_;
+  std::unique_ptr<anbox::AnboxServiceLauncher> anbox_service_launcher_;  
 
   std::unique_ptr<AssistantStateClient> assistant_state_client_;
 

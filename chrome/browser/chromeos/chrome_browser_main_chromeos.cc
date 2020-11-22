@@ -44,6 +44,7 @@
 #include "chrome/browser/chromeos/app_mode/kiosk_mode_idle_app_name_notification.h"
 #include "chrome/browser/chromeos/app_mode/web_app/web_kiosk_app_manager.h"
 #include "chrome/browser/chromeos/arc/session/arc_service_launcher.h"
+#include "chrome/browser/chromeos/arc/session/anbox_service_launcher.h"
 #include "chrome/browser/chromeos/boot_times_recorder.h"
 #include "chrome/browser/chromeos/crostini/crostini_unsupported_action_notifier.h"
 #include "chrome/browser/chromeos/crostini/crosvm_metrics.h"
@@ -585,6 +586,8 @@ void ChromeBrowserMainPartsChromeos::PreMainMessageLoopRun() {
 
   g_browser_process->platform_part()->InitializeSchedulerConfigurationManager();
   arc_service_launcher_ = std::make_unique<arc::ArcServiceLauncher>(
+      g_browser_process->platform_part()->scheduler_configuration_manager());
+  anbox_service_launcher_ = std::make_unique<anbox::AnboxServiceLauncher>(
       g_browser_process->platform_part()->scheduler_configuration_manager());
 
   session_termination_manager_ =

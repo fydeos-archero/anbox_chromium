@@ -19,6 +19,9 @@ source_set("chromeos") {
   assert(enable_extensions, "ChromeOS Chrome has to be built with extensions")
 
   configs += [ "//build/config/compiler:wexit_time_destructors" ]
+  configs += [ "//third_party/anbox:anbox_headers" ]    
+  configs += [ "//third_party/anbox:clang_warnings" ]
+  #configs += [ "//third_party/properties-cpp:properties_cpp_config" ]
 
   public_deps = [
     "//ash/strings",
@@ -303,6 +306,7 @@ source_set("chromeos") {
     "//third_party/re2",
     "//third_party/zlib",
     "//third_party/zlib/google:compression_utils",
+    "//third_party/anbox:anbox_sdk",    
     "//ui/accessibility",
     "//ui/aura",
     "//ui/base",
@@ -690,6 +694,12 @@ source_set("chromeos") {
     "arc/session/arc_service_launcher.h",
     "arc/session/arc_session_manager.cc",
     "arc/session/arc_session_manager.h",
+
+    "arc/session/anbox_service_launcher.cc",
+    "arc/session/anbox_service_launcher.h",
+    "arc/session/anbox_session_manager.cc",
+    "arc/session/anbox_session_manager.h",
+
     "arc/tracing/arc_app_performance_tracing.cc",
     "arc/tracing/arc_app_performance_tracing.h",
     "arc/tracing/arc_app_performance_tracing_custom_session.cc",

@@ -13,6 +13,7 @@
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/browser_process_platform_part_chromeos.h"
 #include "chrome/browser/chromeos/arc/session/arc_service_launcher.h"
+#include "chrome/browser/chromeos/arc/session/anbox_service_launcher.h"
 #include "chrome/browser/chromeos/child_accounts/child_status_reporting_service_factory.h"
 #include "chrome/browser/chromeos/child_accounts/child_user_service_factory.h"
 #include "chrome/browser/chromeos/child_accounts/screen_time_controller_factory.h"
@@ -180,6 +181,7 @@ void UserSessionInitializer::InitializePrimaryProfileServices(
     policy::AppInstallEventLogManagerWrapper::CreateForProfile(profile);
   }
   arc::ArcServiceLauncher::Get()->OnPrimaryUserProfilePrepared(profile);
+  anbox::AnboxServiceLauncher::Get()->OnPrimaryUserProfilePrepared(profile);
 
   crostini::CrostiniManager* crostini_manager =
       crostini::CrostiniManager::GetForProfile(profile);
