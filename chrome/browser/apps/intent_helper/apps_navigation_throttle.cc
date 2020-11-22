@@ -157,6 +157,7 @@ void AppsNavigationThrottle::OnIntentPickerClosed(
     case PickerEntryType::kArc:
     case PickerEntryType::kDevice:
     case PickerEntryType::kMacNative:
+    case PickerEntryType::kAnbox:
       NOTREACHED();
   }
 }
@@ -312,8 +313,9 @@ AppsNavigationThrottle::PickerAction AppsNavigationThrottle::GetPickerAction(
           NOTREACHED();
           return PickerAction::INVALID;
         case PickerEntryType::kArc:
+        case PickerEntryType::kAnbox:                        
           return should_persist ? PickerAction::ARC_APP_PREFERRED_PRESSED
-                                : PickerAction::ARC_APP_PRESSED;
+                                : PickerAction::ARC_APP_PRESSED;        
         case PickerEntryType::kWeb:
           return PickerAction::PWA_APP_PRESSED;
         case PickerEntryType::kDevice:
