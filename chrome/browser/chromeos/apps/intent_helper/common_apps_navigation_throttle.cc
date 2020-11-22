@@ -36,6 +36,9 @@ apps::PickerEntryType GetPickerEntryType(apps::mojom::AppType app_type) {
     case apps::mojom::AppType::kMacNative:
       picker_entry_type = apps::PickerEntryType::kMacNative;
       break;
+    case apps::mojom::AppType::kAnbox:
+      picker_entry_type = apps::PickerEntryType::kAnbox;
+      break;
   }
   return picker_entry_type;
 }
