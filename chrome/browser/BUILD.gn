@@ -1945,6 +1945,8 @@ jumbo_static_library("browser") {
     "//build/config/compiler:wexit_time_destructors",
     "//build/config:precompiled_headers",
   ]
+  configs += [ "//third_party/anbox:anbox_headers" ]
+
   defines = [ "ZLIB_CONST" ]
   libs = []
   ldflags = []
@@ -3828,6 +3830,13 @@ jumbo_static_library("browser") {
       "apps/app_service/arc_apps.h",
       "apps/app_service/arc_apps_factory.cc",
       "apps/app_service/arc_apps_factory.h",
+
+      "apps/app_service/anbox_apps.cc",
+      "apps/app_service/anbox_apps.h",
+      "apps/app_service/anbox_apps_factory.cc",
+      "apps/app_service/anbox_apps_factory.h",
+
+
       "apps/app_service/arc_icon_once_loader.cc",
       "apps/app_service/arc_icon_once_loader.h",
       "apps/app_service/built_in_chromeos_apps.cc",
