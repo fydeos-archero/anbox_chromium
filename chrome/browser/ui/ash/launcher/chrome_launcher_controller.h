@@ -18,6 +18,7 @@
 #include "chrome/browser/ui/app_icon_loader_delegate.h"
 #include "chrome/browser/ui/app_list/app_list_syncable_service.h"
 #include "chrome/browser/ui/ash/launcher/arc_app_window_launcher_controller.h"
+#include "chrome/browser/ui/ash/launcher/anbox_app_window_launcher_controller.h"
 #include "chrome/browser/ui/ash/launcher/discover_window_observer.h"
 #include "chrome/browser/ui/ash/launcher/launcher_app_updater.h"
 #include "chrome/browser/ui/ash/launcher/settings_window_observer.h"
@@ -440,6 +441,7 @@ class ChromeLauncherController
 
   // Pointer to the ARC app window controller owned by app_window_controllers_.
   ArcAppWindowLauncherController* arc_app_window_controller_ = nullptr;
+  AnboxAppWindowLauncherController* anbox_app_window_controller_ = nullptr;
 
   // Used to handle app load/unload events.
   std::vector<std::unique_ptr<LauncherAppUpdater>> app_updaters_;

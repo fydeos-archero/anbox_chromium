@@ -316,6 +316,11 @@ ChromeLauncherController::ChromeLauncherController(Profile* profile,
   arc_app_window_controller_ = arc_app_window_controller.get();
   app_window_controllers_.push_back(std::move(arc_app_window_controller));
 
+  auto anbox_app_window_controller =
+      std::make_unique<AnboxAppWindowLauncherController>(this);
+  anbox_app_window_controller_ = anbox_app_window_controller.get();
+  app_window_controllers_.push_back(std::move(anbox_app_window_controller));
+
   if (crostini::CrostiniFeatures::Get()->IsUIAllowed(profile)) {
     std::unique_ptr<CrostiniAppWindowShelfController> crostini_controller =
         std::make_unique<CrostiniAppWindowShelfController>(this);
@@ -332,6 +337,7 @@ ChromeLauncherController::~ChromeLauncherController() {
 
   // Reset the app window controllers here since it has a weak pointer to this.
   arc_app_window_controller_ = nullptr;
+  anbox_app_window_controller_ = nullptr;
   app_window_controllers_.clear();
 
   // Destroy the ShelfSpinnerController before clearing delegates.
@@ -626,24 +632,34 @@ void ChromeLauncherController::SetRefocusURLPatternForTest(
 ash::ShelfAction ChromeLauncherController::ActivateWindowOrMinimizeIfActive(
     ui::BaseWindow* window,
     bool allow_minimize) {
+  LOG(INFO) << "==== ChromeLauncherController::ActivateWindowOrMinimizeIfActive-0 " << allow_minimize;
+
   // We might have to teleport a window back to the current user.
   aura::Window* native_window = window->GetNativeWindow();
   const AccountId& current_account_id =
       multi_user_util::GetAccountIdFromProfile(profile());
   if (!MultiUserWindowManagerHelper::GetInstance()->IsWindowOnDesktopOfUser(
           native_window, current_account_id)) {
+
+    LOG(INFO) << "==== ChromeLauncherController::ActivateWindowOrMinimizeIfActive-0.1 Activate";
     MultiUserWindowManagerHelper::GetWindowManager()->ShowWindowForUser(
         native_window, current_account_id);
     window->Activate();
     return ash::SHELF_ACTION_WINDOW_ACTIVATED;
   }
+    
+  LOG(INFO) << "==== ChromeLauncherController::ActivateWindowOrMinimizeIfActive-1 " << 
+    window->IsActive() << " " << window->IsMinimized();
 
   AppListClientImpl* app_list_client = AppListClientImpl::GetInstance();
   if (window->IsActive() && allow_minimize &&
       !(app_list_client && app_list_client->app_list_target_visibility())) {
+    LOG(INFO) << "==== ChromeLauncherController::ActivateWindowOrMinimizeIfActive-0.1 Minimize";    
     window->Minimize();
     return ash::SHELF_ACTION_WINDOW_MINIMIZED;
   }
+
+  LOG(INFO) << "==== ChromeLauncherController::ActivateWindowOrMinimizeIfActive-2";
 
   window->Show();
   window->Activate();
@@ -706,7 +722,9 @@ ChromeLauncherController::GetV1ApplicationsFromAppId(
 }
 
 std::vector<aura::Window*> ChromeLauncherController::GetArcWindows() {
-  if (base::FeatureList::IsEnabled(features::kAppServiceInstanceRegistry)) {
+  LOG(INFO) << "=== ChromeLauncherController::GetArcWindows";
+  
+  if (base::FeatureList::IsEnabled(features::kAppServiceInstanceRegistry)) {    
     if (app_service_app_window_controller_)
       return app_service_app_window_controller_->GetArcWindows();
     return std::vector<aura::Window*>();
@@ -718,6 +736,15 @@ std::vector<aura::Window*> ChromeLauncherController::GetArcWindows() {
   std::copy_if(windows.begin(), windows.end(),
                std::inserter(arc_windows, arc_windows.end()),
                [](aura::Window* w) { return arc::IsArcAppWindow(w); });
+
+  std::vector<aura::Window*> windows2 =
+      anbox_app_window_controller_->GetObservedWindows();             
+  std::copy_if(windows2.begin(), windows2.end(),
+               std::inserter(arc_windows, arc_windows.end()),
+               [](aura::Window* w) { 
+                 if (!w) return false;
+                 return w->GetProperty(aura::client::kAppType) == static_cast<int>(ash::AppType::ANBOX_APP);
+               });
   return arc_windows;
 }
 

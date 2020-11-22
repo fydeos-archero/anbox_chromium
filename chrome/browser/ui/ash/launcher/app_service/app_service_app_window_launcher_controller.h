@@ -27,6 +27,7 @@ class InstanceUpdate;
 
 class AppServiceAppWindowCrostiniTracker;
 class AppServiceAppWindowArcTracker;
+class AppServiceAppWindowAnboxTracker;
 class AppWindowBase;
 class ChromeLauncherController;
 class Profile;
@@ -144,6 +145,7 @@ class AppServiceAppWindowLauncherController
   std::unique_ptr<AppServiceInstanceRegistryHelper>
       app_service_instance_helper_;
   std::unique_ptr<AppServiceAppWindowArcTracker> arc_tracker_;
+  std::unique_ptr<AppServiceAppWindowAnboxTracker> anbox_tracker_;
   std::unique_ptr<AppServiceAppWindowCrostiniTracker> crostini_tracker_;
 
   // A list of profiles which we additionally observe.

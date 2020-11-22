@@ -361,6 +361,7 @@ jumbo_static_library("ui") {
     "//build/config:precompiled_headers",
     "//build/config/compiler:wexit_time_destructors",
   ]
+  configs += [ "//third_party/anbox:anbox_headers" ]
 
   # Since browser and browser_ui actually depend on each other,
   # we must omit the dependency from browser_ui to browser.
@@ -3738,6 +3739,12 @@ jumbo_static_library("ui") {
       "app_list/arc/arc_app_list_prefs.h",
       "app_list/arc/arc_app_list_prefs_factory.cc",
       "app_list/arc/arc_app_list_prefs_factory.h",
+
+      "app_list/arc/anbox_app_list_prefs.cc",
+      "app_list/arc/anbox_app_list_prefs.h",
+      "app_list/arc/anbox_app_list_prefs_factory.cc",
+      "app_list/arc/anbox_app_list_prefs_factory.h",
+
       "app_list/arc/arc_app_scoped_pref_update.cc",
       "app_list/arc/arc_app_scoped_pref_update.h",
       "app_list/arc/arc_app_utils.cc",
@@ -3926,6 +3933,10 @@ jumbo_static_library("ui") {
       "ash/assistant/proactive_suggestions_loader.h",
       "ash/launcher/app_service/app_service_app_window_arc_tracker.cc",
       "ash/launcher/app_service/app_service_app_window_arc_tracker.h",
+
+      "ash/launcher/app_service/app_service_app_window_anbox_tracker.cc",
+      "ash/launcher/app_service/app_service_app_window_anbox_tracker.h",      
+
       "ash/launcher/app_service/app_service_app_window_crostini_tracker.cc",
       "ash/launcher/app_service/app_service_app_window_crostini_tracker.h",
       "ash/launcher/app_service/app_service_app_window_launcher_controller.cc",
@@ -3949,6 +3960,10 @@ jumbo_static_library("ui") {
       "ash/launcher/arc_app_window_info.h",
       "ash/launcher/arc_app_window_launcher_controller.cc",
       "ash/launcher/arc_app_window_launcher_controller.h",
+
+      "ash/launcher/anbox_app_window_launcher_controller.cc",
+      "ash/launcher/anbox_app_window_launcher_controller.h",      
+
       "ash/launcher/arc_app_window_launcher_item_controller.cc",
       "ash/launcher/arc_app_window_launcher_item_controller.h",
       "ash/launcher/arc_shelf_context_menu.cc",

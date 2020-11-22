@@ -20,6 +20,7 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/app_list/arc/arc_app_utils.h"
 #include "chrome/browser/ui/ash/launcher/app_service/app_service_app_window_arc_tracker.h"
+#include "chrome/browser/ui/ash/launcher/app_service/app_service_app_window_anbox_tracker.h"
 #include "chrome/browser/ui/ash/launcher/app_service/app_service_app_window_crostini_tracker.h"
 #include "chrome/browser/ui/ash/launcher/app_service/app_service_app_window_launcher_item_controller.h"
 #include "chrome/browser/ui/ash/launcher/app_window_base.h"
@@ -68,6 +69,8 @@ AppServiceAppWindowLauncherController::AppServiceAppWindowLauncherController(
   if (arc::IsArcAllowedForProfile(owner->profile()))
     arc_tracker_ = std::make_unique<AppServiceAppWindowArcTracker>(this);
 
+  anbox_tracker_ = std::make_unique<AppServiceAppWindowAnboxTracker>(this);
+  
   if (crostini::CrostiniFeatures::Get()->IsUIAllowed(owner->profile()))
     crostini_tracker_ =
         std::make_unique<AppServiceAppWindowCrostiniTracker>(this);
@@ -110,6 +113,7 @@ AppServiceAppWindowLauncherController::ControllerForWindow(
 
 void AppServiceAppWindowLauncherController::ActiveUserChanged(
     const std::string& user_email) {
+  LOG(INFO) << "==== AppServiceAppWindowLauncherController::ActiveUserChanged";    
   proxy_ = apps::AppServiceProxyFactory::GetForProfile(owner()->profile());
   DCHECK(proxy_);
   // Deactivates the running app windows in InstanceRegistry for the inactive
@@ -129,6 +133,10 @@ void AppServiceAppWindowLauncherController::ActiveUserChanged(
   app_service_instance_helper_->ActiveUserChanged();
   if (arc_tracker_)
     arc_tracker_->ActiveUserChanged(user_email);
+
+  if (anbox_tracker_){
+    anbox_tracker_->ActiveUserChanged(user_email);
+  }
 }
 
 void AppServiceAppWindowLauncherController::AdditionalUserAddedToSession(
@@ -156,6 +164,10 @@ void AppServiceAppWindowLauncherController::OnWindowInitialized(
   observed_windows_.Add(window);
   if (arc_tracker_)
     arc_tracker_->AddCandidateWindow(window);
+
+  if (anbox_tracker_){
+    anbox_tracker_->AddCandidateWindow(window);
+  }  
 }
 
 void AppServiceAppWindowLauncherController::OnWindowPropertyChanged(
@@ -165,13 +177,19 @@ void AppServiceAppWindowLauncherController::OnWindowPropertyChanged(
   if (key != ash::kShelfIDKey)
     return;
 
+  LOG(INFO) << "==== AppServiceAppWindowLauncherController::OnWindowPropertyChanged key " << key;  
+
   ash::ShelfID shelf_id =
       ash::ShelfID::Deserialize(window->GetProperty(ash::kShelfIDKey));
   if (shelf_id.IsNull())
     return;
 
+  LOG(INFO) << "==== AppServiceAppWindowLauncherController::OnWindowPropertyChanged app_id " << shelf_id.app_id << " " << GetAppType(shelf_id.app_id);
+
   if (GetAppType(shelf_id.app_id) != apps::mojom::AppType::kBuiltIn)
     return;
+
+  LOG(INFO) << "==== AppServiceAppWindowLauncherController::OnWindowPropertyChanged-4";
 
   app_service_instance_helper_->OnInstances(shelf_id.app_id, window,
                                             shelf_id.launch_id,
@@ -183,16 +201,25 @@ void AppServiceAppWindowLauncherController::OnWindowPropertyChanged(
 void AppServiceAppWindowLauncherController::OnWindowVisibilityChanged(
     aura::Window* window,
     bool visible) {
+  LOG(INFO) << "===== AppServiceAppWindowLauncherController::OnWindowVisibilityChanged-0 " << visible;
   // Skip OnWindowVisibilityChanged for ancestors/descendants.
   if (!observed_windows_.IsObserving(window))
-    return;
+    return;  
+
+  LOG(INFO) << "===== AppServiceAppWindowLauncherController::OnWindowVisibilityChanged-1";  
 
   if (arc_tracker_)
     arc_tracker_->OnWindowVisibilityChanged(window);
 
+  if (anbox_tracker_){
+    anbox_tracker_->OnWindowVisibilityChanged(window);
+  }    
+
   ash::ShelfID shelf_id = GetShelfId(window);
   if (shelf_id.IsNull())
     return;
+
+  LOG(INFO) << "===== AppServiceAppWindowLauncherController::OnWindowVisibilityChanged-2";  
 
   if (app_service_instance_helper_->IsOpenedInBrowser(GetAppId(shelf_id.app_id),
                                                       window) ||
@@ -201,6 +228,8 @@ void AppServiceAppWindowLauncherController::OnWindowVisibilityChanged(
                                                             visible);
     return;
   }
+
+  LOG(INFO) << "===== AppServiceAppWindowLauncherController::OnWindowVisibilityChanged-3";  
 
   // Update |state|. The app must be started, and running state. If visible,
   // set it as |kVisible|, otherwise, clear the visible bit.
@@ -215,6 +244,8 @@ void AppServiceAppWindowLauncherController::OnWindowVisibilityChanged(
     return;
   }
 
+  LOG(INFO) << "===== AppServiceAppWindowLauncherController::OnWindowVisibilityChanged-4";  
+
   RegisterWindow(window, shelf_id);
 
   if (crostini_tracker_)
@@ -227,6 +258,10 @@ void AppServiceAppWindowLauncherController::OnWindowDestroying(
   observed_windows_.Remove(window);
   if (arc_tracker_)
     arc_tracker_->RemoveCandidateWindow(window);
+
+  if (anbox_tracker_){
+    anbox_tracker_->RemoveCandidateWindow(window);
+  }      
 
   // When the window is destroyed, we should search all proxies, because the
   // window could be teleported from the inactive user, and isn't saved in the
@@ -268,6 +303,12 @@ void AppServiceAppWindowLauncherController::OnWindowDestroying(
     return;
   }
 
+  if (anbox_tracker_ && arc::GetWindowTaskId(window) != arc::kNoTaskId) {
+    anbox_tracker_->OnWindowDestroying(window);
+    aura_window_to_app_window_.erase(app_window_it);
+    return;
+  }  
+
   RemoveAppWindowFromShelf(app_window_it->second.get());
 
   if (!app_id.empty() && crostini_tracker_)
@@ -285,6 +326,9 @@ void AppServiceAppWindowLauncherController::OnWindowActivated(
 
   if (arc_tracker_)
     arc_tracker_->OnTaskSetActive(arc_tracker_->active_task_id());
+
+  if (anbox_tracker_)
+    anbox_tracker_->OnTaskSetActive(anbox_tracker_->active_task_id());  
 
   SetWindowActivated(new_active, /*active*/ true);
   SetWindowActivated(old_active, /*active*/ false);
@@ -371,6 +415,10 @@ void AppServiceAppWindowLauncherController::OnInstanceRegistryWillBeDestroyed(
 int AppServiceAppWindowLauncherController::GetActiveTaskId() const {
   if (arc_tracker_)
     return arc_tracker_->active_task_id();
+
+  if (anbox_tracker_)
+    return anbox_tracker_->active_task_id();
+
   return arc::kNoTaskId;
 }
 
@@ -385,6 +433,8 @@ void AppServiceAppWindowLauncherController::UnregisterWindow(
 void AppServiceAppWindowLauncherController::AddWindowToShelf(
     aura::Window* window,
     const ash::ShelfID& shelf_id) {
+  LOG(INFO) << "==== AppServiceAppWindowLauncherController::AddWindowToShelf " << shelf_id;
+
   if (base::Contains(aura_window_to_app_window_, window))
     return;
 
@@ -426,19 +476,27 @@ AppServiceAppWindowLauncherController::GetArcWindows() {
 void AppServiceAppWindowLauncherController::SetWindowActivated(
     aura::Window* window,
     bool active) {
+  LOG(INFO) << "=== AppServiceAppWindowLauncherController::SetWindowActivated-0 " << active;     
   if (!window || !observed_windows_.IsObserving(window))
     return;
+
+  LOG(INFO) << "=== AppServiceAppWindowLauncherController::SetWindowActivated-1 " << active;       
 
   const ash::ShelfID shelf_id = GetShelfId(window);
   if (shelf_id.IsNull())
     return;
 
+  LOG(INFO) << "=== AppServiceAppWindowLauncherController::SetWindowActivated-2 " << active;         
+
   if (app_service_instance_helper_->IsOpenedInBrowser(GetAppId(shelf_id.app_id),
                                                       window) ||
       shelf_id.app_id == extension_misc::kChromeAppId) {
+    LOG(INFO) << "=== AppServiceAppWindowLauncherController::SetWindowActivated-3 " << shelf_id;
     app_service_instance_helper_->SetWindowActivated(shelf_id, window, active);
     return;
   }
+
+  LOG(INFO) << "=== AppServiceAppWindowLauncherController::SetWindowActivated-4 " << shelf_id;
 
   apps::InstanceState state =
       app_service_instance_helper_->CalculateActivatedState(window, active);
@@ -449,16 +507,22 @@ void AppServiceAppWindowLauncherController::SetWindowActivated(
 void AppServiceAppWindowLauncherController::RegisterWindow(
     aura::Window* window,
     const ash::ShelfID& shelf_id) {
+  LOG(INFO) << "==== AppServiceAppWindowLauncherController::RegisterWindow";
+
   // Skip when this window has been handled. This can happen when the window
   // becomes visible again.
   auto app_window_it = aura_window_to_app_window_.find(window);
   if (app_window_it != aura_window_to_app_window_.end())
     return;
 
+  LOG(INFO) << "==== AppServiceAppWindowLauncherController::RegisterWindow-1";  
+
   // For the ARC apps window, AttachControllerToWindow calls AddWindowToShelf,
   // so we don't need to call AddWindowToShelf again.
   if (arc_tracker_ && arc::GetWindowTaskId(window) != arc::kNoTaskId) {
     arc_tracker_->AttachControllerToWindow(window);
+  } else if (anbox_tracker_ && arc::GetWindowTaskId(window) != arc::kNoTaskId) {
+    anbox_tracker_->AttachControllerToWindow(window);
   } else {
     // The window for ARC Play Store is a special window, which is created by
     // both Extensions and ARC. If Extensions's window is generated after
@@ -540,6 +604,9 @@ void AppServiceAppWindowLauncherController::OnItemDelegateDiscarded(
     if (arc_tracker_)
       arc_tracker_->OnItemDelegateDiscarded(app_window->shelf_id(), delegate);
 
+    if (anbox_tracker_)
+      anbox_tracker_->OnItemDelegateDiscarded(app_window->shelf_id(), delegate);  
+
     if (!app_window || app_window->controller() != delegate)
       continue;
 
@@ -565,6 +632,9 @@ ash::ShelfID AppServiceAppWindowLauncherController::GetShelfId(
   ash::ShelfID shelf_id;
   if (arc_tracker_)
     shelf_id = arc_tracker_->GetShelfId(arc::GetWindowTaskId(window));
+
+  if (anbox_tracker_)
+    shelf_id = anbox_tracker_->GetShelfId(arc::GetWindowTaskId(window));  
 
   if (!shelf_id.IsNull())
     return shelf_id;
@@ -603,6 +673,7 @@ void AppServiceAppWindowLauncherController::UserHasAppOnActiveDesktop(
     aura::Window* window,
     const ash::ShelfID& shelf_id,
     content::BrowserContext* browser_context) {
+  LOG(INFO) << "===== AppServiceAppWindowLauncherController::UserHasAppOnActiveDesktop";    
   // If the window was created for the active user, register it to show an item
   // on the shelf.
   if (proxy_->InstanceRegistry().Exists(window)) {
