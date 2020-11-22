@@ -86,7 +86,7 @@ void ChromeOsAppsNavigationThrottle::OnIntentPickerClosed(
   const bool should_launch_app =
       close_reason == apps::IntentPickerCloseReason::OPEN_APP;
   switch (entry_type) {
-    case apps::PickerEntryType::kArc:
+    case apps::PickerEntryType::kArc:    
       if (arc::ArcIntentPickerAppFetcher::MaybeLaunchOrPersistArcApp(
               url, launch_name, should_launch_app, should_persist)) {
         CloseOrGoBack(web_contents);
@@ -97,6 +97,9 @@ void ChromeOsAppsNavigationThrottle::OnIntentPickerClosed(
           launch_name, entry_type, close_reason, apps::Source::kHttpOrHttps,
           should_persist);
       return;
+    case apps::PickerEntryType::kAnbox:
+      LOG(INFO) << "===== ChromeOsAppsNavigationThrottle::OnIntentPickerClosed - wait for implementation";
+      break;
     case apps::PickerEntryType::kUnknown:
       // TODO(crbug.com/826982): This workaround can be removed when preferences
       // are no longer persisted within the ARC container, it was necessary
