@@ -107,6 +107,7 @@ base::string16 AppUninstallDialogView::GetWindowTitle() const {
       NOTREACHED();
       return base::string16();
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kAnbox:
 #if defined(OS_CHROMEOS)
       if (shortcut_)
         return l10n_util::GetStringUTF16(IDS_EXTENSION_UNINSTALL_PROMPT_TITLE);
@@ -155,6 +156,9 @@ void AppUninstallDialogView::InitializeView(Profile* profile,
 #else
       NOTREACHED();
 #endif
+      break;
+    case apps::mojom::AppType::kAnbox:
+      LOG(INFO) << "======== AppUninstallDialogView::InitializeView - wait for implementation";      
       break;
     case apps::mojom::AppType::kCrostini:
 #if defined(OS_CHROMEOS)

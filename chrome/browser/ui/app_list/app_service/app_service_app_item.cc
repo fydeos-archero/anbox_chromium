@@ -47,6 +47,9 @@ std::unique_ptr<app_list::AppContextMenu> AppServiceAppItem::MakeAppContextMenu(
     case apps::mojom::AppType::kArc:
       return std::make_unique<ArcAppContextMenu>(delegate, profile, app_id,
                                                  controller);
+    case apps::mojom::AppType::kAnbox:                                             
+      LOG(INFO) << "======= AppServiceAppItem::MakeAppContextMenu - wait for implementation";
+      return nullptr;
 
     case apps::mojom::AppType::kCrostini:
       return std::make_unique<CrostiniAppContextMenu>(profile, app_id,

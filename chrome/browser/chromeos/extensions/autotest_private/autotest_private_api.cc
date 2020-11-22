@@ -289,6 +289,7 @@ api::autotest_private::ShelfItemStatus GetShelfItemStatus(
 api::autotest_private::AppType GetAppType(apps::mojom::AppType type) {
   switch (type) {
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kAnbox:
       return api::autotest_private::AppType::APP_TYPE_ARC;
     case apps::mojom::AppType::kBuiltIn:
       return api::autotest_private::AppType::APP_TYPE_BUILTIN;
@@ -310,6 +311,7 @@ api::autotest_private::AppType GetAppType(apps::mojom::AppType type) {
 api::autotest_private::AppWindowType GetAppWindowType(ash::AppType type) {
   switch (type) {
     case ash::AppType::ARC_APP:
+    case ash::AppType::ANBOX_APP:
       return api::autotest_private::AppWindowType::APP_WINDOW_TYPE_ARCAPP;
     case ash::AppType::SYSTEM_APP:
       return api::autotest_private::AppWindowType::APP_WINDOW_TYPE_SYSTEMAPP;

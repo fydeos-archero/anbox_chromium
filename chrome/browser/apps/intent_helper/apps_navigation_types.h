@@ -74,6 +74,7 @@ enum class PickerEntryType {
   kWeb,
   kDevice,
   kMacNative,
+  kAnbox,
 };
 
 // Represents the data required to display an app in a picker to the user.
