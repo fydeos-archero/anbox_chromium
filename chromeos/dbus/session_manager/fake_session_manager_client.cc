@@ -634,6 +634,11 @@ void FakeSessionManagerClient::StartArcMiniContainer(
   PostReply(FROM_HERE, std::move(callback), true);
 }
 
+void FakeSessionManagerClient::StartAnboxContainer(      
+      VoidDBusMethodCallback callback){
+
+}
+
 void FakeSessionManagerClient::UpgradeArcContainer(
     const login_manager::UpgradeArcContainerRequest& request,
     VoidDBusMethodCallback callback) {

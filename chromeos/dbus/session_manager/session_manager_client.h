@@ -395,6 +395,8 @@ class COMPONENT_EXPORT(SESSION_MANAGER) SessionManagerClient {
       const login_manager::StartArcMiniContainerRequest& request,
       VoidDBusMethodCallback callback) = 0;
 
+  virtual void StartAnboxContainer(VoidDBusMethodCallback callback) = 0;    
+
   // UpgradeArcContainer upgrades a mini-container to a full ARC container. On
   // upgrade failure, the container will be shutdown. The container shutdown
   // will trigger the ArcInstanceStopped signal (as usual). There are no

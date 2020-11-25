@@ -125,6 +125,8 @@ class COMPONENT_EXPORT(SESSION_MANAGER) FakeSessionManagerClient
   void StartArcMiniContainer(
       const login_manager::StartArcMiniContainerRequest& request,
       VoidDBusMethodCallback callback) override;
+  void StartAnboxContainer(      
+      VoidDBusMethodCallback callback) override;    
   void UpgradeArcContainer(
       const login_manager::UpgradeArcContainerRequest& request,
       VoidDBusMethodCallback callback) override;

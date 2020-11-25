@@ -561,6 +561,17 @@ class SessionManagerClientImpl : public SessionManagerClient {
                        weak_ptr_factory_.GetWeakPtr(), std::move(callback)));
   }
 
+  void StartAnboxContainer(VoidDBusMethodCallback callback) override {
+    DCHECK(!callback.is_null());
+    dbus::MethodCall method_call(
+        login_manager::kSessionManagerInterface, "StartAnboxContainer");    
+
+    session_manager_proxy_->CallMethod(
+        &method_call, kStartArcTimeout,
+        base::BindOnce(&SessionManagerClientImpl::OnVoidMethod,
+                       weak_ptr_factory_.GetWeakPtr(), std::move(callback)));
+  }
+
   void UpgradeArcContainer(
       const login_manager::UpgradeArcContainerRequest& request,
       VoidDBusMethodCallback callback) override {
