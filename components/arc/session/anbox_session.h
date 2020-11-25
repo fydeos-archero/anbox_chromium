@@ -68,6 +68,7 @@ public:
 public:
   void Initialize();
   bool LaunchApp(std::string &name, std::string &package, std::string &component);
+  void OnAnboxInstanceStarted(bool result);
 
   // Adds or removes observers.
   void AddObserver(Observer* observer){
@@ -102,6 +103,9 @@ private:
   anbox::common::WaitHandle launch_wait_handle_;
 
   std::map<std::string, AppInfo> launched_apps_;  
+
+  // WeakPtrFactory to use callbacks.
+  base::WeakPtrFactory<AnboxSession> weak_factory_{this};
 
 private:
   DISALLOW_COPY_AND_ASSIGN(AnboxSession);

@@ -31,6 +31,8 @@
 
 #include "fydeos/anbox_rpc_chrome.h"
 
+#include "chromeos/dbus/session_manager/session_manager_client.h"
+
 
 namespace arc{
 
@@ -180,6 +182,15 @@ void AnboxSession::Initialize(){
   );
 
   rt_->start();  
+
+  chromeos::SessionManagerClient::Get()->StartAnboxContainer(
+    base::BindOnce(&AnboxSession::OnAnboxInstanceStarted,
+                                       weak_factory_.GetWeakPtr())
+  );
+}
+
+void AnboxSession::OnAnboxInstanceStarted(bool result) {
+  LOG(INFO) << "====== AnboxSession::OnAnboxInstanceStarted " << result;
 }
 
 bool AnboxSession::LaunchApp(std::string &name, std::string &package, std::string &component){
