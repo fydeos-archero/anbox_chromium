@@ -9,6 +9,8 @@
 
 #include "content/public/browser/browser_thread.h"
 
+class Profile;
+
 namespace arc{
 class AnboxSession;
 
@@ -17,7 +19,7 @@ public:
   AnboxSessionManager();
 
 public:
-  void Initialize();  
+  void Initialize(Profile* profile);  
 
   static AnboxSessionManager* Get();  
 

@@ -40,9 +40,10 @@ void AnboxServiceLauncher::OnPrimaryUserProfilePrepared(Profile* profile){
   // scheduler_configuration_manager_;
   LOG(INFO) << "===== AnboxServiceLauncher::OnPrimaryUserProfilePrepared";
 
-  apps::AnboxAppsFactory::GetForProfile(profile);  
+  apps::AnboxAppsFactory::GetForProfile(profile);    
   // arc::ArcInstanceThrottle::GetForBrowserContext(profile);
-  anbox_session_manager_->Initialize();   
+  
+  anbox_session_manager_->Initialize(profile);   
 }
 
 }
