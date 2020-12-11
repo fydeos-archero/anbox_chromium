@@ -26,6 +26,7 @@
 #include "chrome/browser/chromeos/extensions/default_web_app_ids.h"
 #include "chrome/browser/chromeos/file_manager/app_id.h"
 #include "chrome/browser/chromeos/file_manager/arc_file_tasks.h"
+#include "chrome/browser/chromeos/file_manager/anbox_file_tasks.h"
 #include "chrome/browser/chromeos/file_manager/crostini_file_tasks.h"
 #include "chrome/browser/chromeos/file_manager/file_browser_handlers.h"
 #include "chrome/browser/chromeos/file_manager/file_tasks_notifier.h"
@@ -80,6 +81,7 @@ namespace {
 const char kFileBrowserHandlerTaskType[] = "file";
 const char kFileHandlerTaskType[] = "app";
 const char kArcAppTaskType[] = "arc";
+const char kAnboxAppTaskType[] = "anbox";
 const char kCrostiniAppTaskType[] = "crostini";
 const char kWebAppTaskType[] = "web";
 const char kImportCrostiniImageHandlerId[] = "import-crostini-image";
@@ -94,6 +96,8 @@ std::string TaskTypeToString(TaskType task_type) {
       return kFileHandlerTaskType;
     case TASK_TYPE_ARC_APP:
       return kArcAppTaskType;
+    case TASK_TYPE_ANBOX_APP:
+      return kAnboxAppTaskType;
     case TASK_TYPE_CROSTINI_APP:
       return kCrostiniAppTaskType;
     case TASK_TYPE_WEB_APP:
@@ -115,6 +119,8 @@ TaskType StringToTaskType(const std::string& str) {
     return TASK_TYPE_FILE_HANDLER;
   if (str == kArcAppTaskType)
     return TASK_TYPE_ARC_APP;
+  if (str == kAnboxAppTaskType)  
+    return TASK_TYPE_ANBOX_APP;
   if (str == kCrostiniAppTaskType)
     return TASK_TYPE_CROSTINI_APP;
   if (str == kWebAppTaskType)
@@ -224,6 +230,16 @@ void ExecuteByArcAfterMimeTypesCollected(
     extensions::app_file_handler_util::MimeTypeCollector* mime_collector,
     std::unique_ptr<std::vector<std::string>> mime_types) {
   ExecuteArcTask(profile, task, file_urls, *mime_types, std::move(done));
+}
+
+void ExecuteByAnboxAfterMimeTypesCollected(
+    Profile* profile,
+    const TaskDescriptor& task,
+    const std::vector<FileSystemURL>& file_urls,
+    FileTaskFinishedCallback done,
+    extensions::app_file_handler_util::MimeTypeCollector* mime_collector,
+    std::unique_ptr<std::vector<std::string>> mime_types) {
+  ExecuteAnboxTask(profile, task, file_urls, *mime_types, std::move(done));
 }
 
 void PostProcessFoundTasks(
@@ -420,6 +436,8 @@ bool ExecuteFileTask(Profile* profile,
                               task.task_type, NUM_TASK_TYPE);
   }
 
+  LOG(INFO) << "=== ExecuteFileTask " << task.app_id;
+
   // TODO(crbug.com/1005640): Move recording this metric to the App Service when
   // file handling is supported there.
   apps::RecordAppLaunch(task.app_id,
@@ -435,6 +453,16 @@ bool ExecuteFileTask(Profile* profile,
         new extensions::app_file_handler_util::MimeTypeCollector(profile);
     mime_collector->CollectForURLs(
         file_urls, base::BindOnce(&ExecuteByArcAfterMimeTypesCollected, profile,
+                                  task, file_urls, std::move(done),
+                                  base::Owned(mime_collector)));
+    return true;
+  }
+
+  if (task.task_type == TASK_TYPE_ANBOX_APP) {
+    extensions::app_file_handler_util::MimeTypeCollector* mime_collector =
+        new extensions::app_file_handler_util::MimeTypeCollector(profile);
+    mime_collector->CollectForURLs(
+        file_urls, base::BindOnce(&ExecuteByAnboxAfterMimeTypesCollected, profile,
                                   task, file_urls, std::move(done),
                                   base::Owned(mime_collector)));
     return true;
@@ -700,7 +728,7 @@ void FindFileBrowserHandlerTasks(
   }
 }
 
-void FindExtensionAndAppTasks(
+void FindExtensionAndAppTasks2(
     Profile* profile,
     const std::vector<extensions::EntryInfo>& entries,
     const std::vector<GURL>& file_urls,
@@ -725,6 +753,17 @@ void FindExtensionAndAppTasks(
       // Done. Apply post-filtering and callback.
       base::BindOnce(PostProcessFoundTasks, profile, entries,
                      std::move(callback), std::move(result_list)));
+}
+
+void FindExtensionAndAppTasks(
+    Profile* profile,
+    const std::vector<extensions::EntryInfo>& entries,
+    const std::vector<GURL>& file_urls,
+    FindTasksCallback callback,
+    std::unique_ptr<std::vector<FullTaskDescriptor>> result_list) {
+
+  FindAnboxTasks(profile, entries, file_urls, std::move(result_list), base::BindOnce(&FindExtensionAndAppTasks2, profile, entries,
+                              file_urls, std::move(callback)));
 }
 
 void FindAllTypesOfTasks(Profile* profile,

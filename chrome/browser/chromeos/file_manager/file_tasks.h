@@ -129,6 +129,7 @@ enum TaskType {
   TASK_TYPE_FILE_HANDLER,
   DEPRECATED_TASK_TYPE_DRIVE_APP,
   TASK_TYPE_ARC_APP,
+  TASK_TYPE_ANBOX_APP,
   TASK_TYPE_CROSTINI_APP,
   TASK_TYPE_WEB_APP,
   // The enum values must be kept in sync with FileManagerTaskType in

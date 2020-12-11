@@ -1060,6 +1060,8 @@ source_set("chromeos") {
     "file_manager/app_id.h",
     "file_manager/arc_file_tasks.cc",
     "file_manager/arc_file_tasks.h",
+    "file_manager/anbox_file_tasks.cc",
+    "file_manager/anbox_file_tasks.h",
     "file_manager/crostini_file_tasks.cc",
     "file_manager/crostini_file_tasks.h",
     "file_manager/documents_provider_root_manager.cc",
