@@ -747,10 +747,10 @@ void AnboxApps::GetMenuModel(const std::string& app_id,
   }
 
   // App Info item.
-  if (app_info->ready && ShouldShow(*app_info)) {
-    AddCommandItem(ash::SHOW_APP_INFO, IDS_APP_CONTEXT_MENU_SHOW_INFO,
-                   &menu_items);
-  }
+  // if (app_info->ready && ShouldShow(*app_info)) {
+  //   AddCommandItem(ash::SHOW_APP_INFO, IDS_APP_CONTEXT_MENU_SHOW_INFO,
+  //                  &menu_items);
+  // }
 
   if (menu_type == apps::mojom::MenuType::kShelf &&
       base::Contains(app_id_to_task_ids_, app_id)) {
@@ -1132,7 +1132,7 @@ apps::mojom::AppPtr AnboxApps::Convert(AnboxAppListPrefs* prefs,
 }
 
 void AnboxApps::Publish(apps::mojom::AppPtr app) {
-  LOG(INFO) << "=== AnboxApps::Publish" << app->app_id << " " << app->app_type;
+  LOG(INFO) << "=== AnboxApps::Publish " << app->app_id << " " << app->app_type;
 
   for (auto& subscriber : subscribers_) {
     std::vector<apps::mojom::AppPtr> apps;
