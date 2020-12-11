@@ -360,8 +360,7 @@ jumbo_static_library("ui") {
   configs += [
     "//build/config:precompiled_headers",
     "//build/config/compiler:wexit_time_destructors",
-  ]
-  configs += [ "//third_party/anbox:anbox_headers" ]
+  ]  
 
   # Since browser and browser_ui actually depend on each other,
   # we must omit the dependency from browser_ui to browser.
@@ -3700,6 +3699,8 @@ jumbo_static_library("ui") {
   }
 
   if (is_chromeos) {
+    configs += [ "//third_party/anbox:anbox_headers" ]    
+
     sources += [
       "app_icon_loader_delegate.h",
       "app_list/app_context_menu.cc",
@@ -3953,6 +3954,10 @@ jumbo_static_library("ui") {
       "ash/launcher/app_window_base.h",
       "ash/launcher/arc_app_shelf_id.cc",
       "ash/launcher/arc_app_shelf_id.h",
+
+      "ash/launcher/anbox_app_window.cc",
+      "ash/launcher/anbox_app_window.h",
+
       "ash/launcher/arc_app_window.cc",
       "ash/launcher/arc_app_window.h",
       "ash/launcher/arc_app_window_delegate.h",

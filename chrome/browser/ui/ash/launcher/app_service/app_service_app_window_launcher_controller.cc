@@ -25,7 +25,7 @@
 #include "chrome/browser/ui/ash/launcher/app_service/app_service_app_window_launcher_item_controller.h"
 #include "chrome/browser/ui/ash/launcher/app_window_base.h"
 #include "chrome/browser/ui/ash/launcher/app_window_launcher_item_controller.h"
-#include "chrome/browser/ui/ash/launcher/arc_app_window.h"
+#include "chrome/browser/ui/ash/launcher/anbox_app_window.h"
 #include "chrome/browser/ui/ash/launcher/chrome_launcher_controller.h"
 #include "chrome/browser/ui/ash/multi_user/multi_user_util.h"
 #include "chrome/browser/ui/ash/multi_user/multi_user_window_manager_helper.h"
@@ -254,6 +254,7 @@ void AppServiceAppWindowLauncherController::OnWindowVisibilityChanged(
 
 void AppServiceAppWindowLauncherController::OnWindowDestroying(
     aura::Window* window) {
+  LOG(INFO) << "==== AppServiceAppWindowLauncherController::OnWindowDestroying";    
   DCHECK(observed_windows_.IsObserving(window));
   observed_windows_.Remove(window);
   if (arc_tracker_)
@@ -294,17 +295,17 @@ void AppServiceAppWindowLauncherController::OnWindowDestroying(
   if (app_window_it == aura_window_to_app_window_.end())
     return;
 
+  if (anbox_tracker_ && arc::GetWindowTaskId(window) != arc::kNoTaskId) {
+    anbox_tracker_->OnWindowDestroying(window);
+    aura_window_to_app_window_.erase(app_window_it);
+    return;
+  }  
+  
   // Note, for ARC apps, window may be recreated in some cases, so do not close
   // controller on window destroying. Controller will be closed onTaskDestroyed
   // event which is generated when actual task is destroyed.
   if (arc_tracker_ && arc::GetWindowTaskId(window) != arc::kNoTaskId) {
     arc_tracker_->OnWindowDestroying(window);
-    aura_window_to_app_window_.erase(app_window_it);
-    return;
-  }
-
-  if (anbox_tracker_ && arc::GetWindowTaskId(window) != arc::kNoTaskId) {
-    anbox_tracker_->OnWindowDestroying(window);
     aura_window_to_app_window_.erase(app_window_it);
     return;
   }  
@@ -440,19 +441,30 @@ void AppServiceAppWindowLauncherController::AddWindowToShelf(
 
   AppWindowBase* app_window;
   if (arc::GetWindowTaskId(window) != arc::kNoTaskId) {
-    std::unique_ptr<ArcAppWindow> app_window_ptr =
-        std::make_unique<ArcAppWindow>(
+    std::unique_ptr<AnboxAppWindow> app_window_ptr =
+        std::make_unique<AnboxAppWindow>(
             arc::GetWindowTaskId(window),
             arc::ArcAppShelfId::FromString(shelf_id.app_id),
             views::Widget::GetWidgetForNativeWindow(window), this,
             owner()->profile());
     app_window = app_window_ptr.get();
     aura_window_to_app_window_[window] = std::move(app_window_ptr);
-  } else {
-    auto app_window_ptr = std::make_unique<AppWindowBase>(
-        shelf_id, views::Widget::GetWidgetForNativeWindow(window));
-    app_window = app_window_ptr.get();
-    aura_window_to_app_window_[window] = std::move(app_window_ptr);
+  }else{
+    if (arc::GetWindowTaskId(window) != arc::kNoTaskId) {
+      std::unique_ptr<ArcAppWindow> app_window_ptr =
+          std::make_unique<ArcAppWindow>(
+              arc::GetWindowTaskId(window),
+              arc::ArcAppShelfId::FromString(shelf_id.app_id),
+              views::Widget::GetWidgetForNativeWindow(window), this,
+              owner()->profile());
+      app_window = app_window_ptr.get();
+      aura_window_to_app_window_[window] = std::move(app_window_ptr);
+    } else {
+      auto app_window_ptr = std::make_unique<AppWindowBase>(
+          shelf_id, views::Widget::GetWidgetForNativeWindow(window));
+      app_window = app_window_ptr.get();
+      aura_window_to_app_window_[window] = std::move(app_window_ptr);
+    }
   }
   AddAppWindowToShelf(app_window);
 }
@@ -549,6 +561,8 @@ void AppServiceAppWindowLauncherController::UnregisterAppWindow(
   AppWindowLauncherItemController* const controller = app_window->controller();
   if (controller)
     controller->RemoveWindow(app_window);
+
+  LOG(INFO) << "=== AppServiceAppWindowLauncherController::UnregisterAppWindow " << controller;
 
   app_window->SetController(nullptr);
 }
