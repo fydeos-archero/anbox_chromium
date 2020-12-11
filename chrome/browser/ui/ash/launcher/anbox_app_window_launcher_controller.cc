@@ -17,7 +17,7 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/app_list/arc/arc_app_utils.h"
 #include "chrome/browser/ui/ash/launcher/app_window_launcher_item_controller.h"
-#include "chrome/browser/ui/ash/launcher/arc_app_window.h"
+#include "chrome/browser/ui/ash/launcher/anbox_app_window.h"
 #include "chrome/browser/ui/ash/launcher/arc_app_window_launcher_item_controller.h"
 #include "chrome/browser/ui/ash/launcher/chrome_launcher_controller.h"
 #include "chrome/browser/ui/ash/launcher/chrome_launcher_controller_util.h"
@@ -64,13 +64,13 @@ class AnboxAppWindowLauncherController::AppWindowInfo {
     }
   }
 
-  void set_app_window(std::unique_ptr<ArcAppWindow> window) {
+  void set_app_window(std::unique_ptr<AnboxAppWindow> window) {
     app_window_ = std::move(window);
   }
 
   const arc::ArcAppShelfId& app_shelf_id() const { return app_shelf_id_; }
 
-  ArcAppWindow* app_window() { return app_window_.get(); }
+  AnboxAppWindow* app_window() { return app_window_.get(); }
 
   const std::string& launch_intent() { return launch_intent_; }
 
@@ -88,7 +88,7 @@ class AnboxAppWindowLauncherController::AppWindowInfo {
   std::string title_;
   // Keeps overridden window icon.
   std::vector<uint8_t> icon_data_png_;
-  std::unique_ptr<ArcAppWindow> app_window_;
+  std::unique_ptr<AnboxAppWindow> app_window_;
 
   DISALLOW_COPY_AND_ASSIGN(AppWindowInfo);
 };
@@ -216,7 +216,7 @@ AnboxAppWindowLauncherController::GetAppWindowInfoForTask(int task_id) {
   return it == task_id_to_app_window_info_.end() ? nullptr : it->second.get();
 }
 
-ArcAppWindow* AnboxAppWindowLauncherController::GetAppWindowForTask(int task_id) {
+AnboxAppWindow* AnboxAppWindowLauncherController::GetAppWindowForTask(int task_id) {
   AppWindowInfo* info = GetAppWindowInfoForTask(task_id);
   return info ? info->app_window() : nullptr;
 }
@@ -252,7 +252,7 @@ void AnboxAppWindowLauncherController::AttachControllerToWindowIfNeeded(
   views::Widget* widget = views::Widget::GetWidgetForNativeWindow(window);
   DCHECK(widget);
   DCHECK(!info->app_window());
-  info->set_app_window(std::make_unique<ArcAppWindow>(
+  info->set_app_window(std::make_unique<AnboxAppWindow>(
       task_id, info->app_shelf_id(), widget, this, observed_profile_));
   info->app_window()->SetDescription(info->title(), info->icon_data_png());
   RegisterApp(info);
@@ -372,20 +372,20 @@ void AnboxAppWindowLauncherController::OnTaskSetActive(int32_t task_id) {
     return;
   }
 
-  ArcAppWindow* previous_app_window = GetAppWindowForTask(active_task_id_);
+  AnboxAppWindow* previous_app_window = GetAppWindowForTask(active_task_id_);
   if (previous_app_window) {
     owner()->SetItemStatus(previous_app_window->shelf_id(),
                            ash::STATUS_RUNNING);
     previous_app_window->SetFullscreenMode(
         previous_app_window->widget() &&
                 previous_app_window->widget()->IsFullscreen()
-            ? ArcAppWindow::FullScreenMode::kActive
-            : ArcAppWindow::FullScreenMode::kNonActive);
+            ? AnboxAppWindow::FullScreenMode::kActive
+            : AnboxAppWindow::FullScreenMode::kNonActive);
   }
 
   active_task_id_ = task_id;
 
-  ArcAppWindow* current_app_window = GetAppWindowForTask(task_id);
+  AnboxAppWindow* current_app_window = GetAppWindowForTask(task_id);
   if (current_app_window) {
     if (current_app_window->widget() && current_app_window->IsActive()) {
       current_app_window->controller()->SetActiveWindow(
@@ -412,14 +412,14 @@ AnboxAppWindowLauncherController::ControllerForWindow(aura::Window* window) {
   if (!window)
     return nullptr;
 
-  ArcAppWindow* app_window = GetAppWindowForTask(active_task_id_);
+  AnboxAppWindow* app_window = GetAppWindowForTask(active_task_id_);
   if (app_window &&
       app_window->widget() == views::Widget::GetWidgetForNativeWindow(window)) {
     return app_window->controller();
   }
 
   for (auto& it : task_id_to_app_window_info_) {
-    ArcAppWindow* app_window = it.second->app_window();
+    AnboxAppWindow* app_window = it.second->app_window();
     if (app_window && app_window->widget() ==
                           views::Widget::GetWidgetForNativeWindow(window)) {
       return it.second->app_window()->controller();
@@ -432,7 +432,7 @@ AnboxAppWindowLauncherController::ControllerForWindow(aura::Window* window) {
 void AnboxAppWindowLauncherController::OnItemDelegateDiscarded(
     ash::ShelfItemDelegate* delegate) {
   for (auto& it : task_id_to_app_window_info_) {
-    ArcAppWindow* app_window = it.second->app_window();
+    AnboxAppWindow* app_window = it.second->app_window();
     if (!app_window || app_window->controller() != delegate)
       continue;
 
@@ -512,7 +512,7 @@ AnboxAppWindowLauncherController::AttachControllerToTask(
 
 void AnboxAppWindowLauncherController::RegisterApp(
     AppWindowInfo* app_window_info) {
-  ArcAppWindow* app_window = app_window_info->app_window();
+  AnboxAppWindow* app_window = app_window_info->app_window();
   ArcAppWindowLauncherItemController* controller =
       AttachControllerToTask(app_window->task_id(), *app_window_info);
   DCHECK(!controller->app_id().empty());
@@ -530,7 +530,7 @@ void AnboxAppWindowLauncherController::RegisterApp(
 
 void AnboxAppWindowLauncherController::UnregisterApp(
     AppWindowInfo* app_window_info) {
-  ArcAppWindow* app_window = app_window_info->app_window();
+  AnboxAppWindow* app_window = app_window_info->app_window();
   if (!app_window)
     return;
 

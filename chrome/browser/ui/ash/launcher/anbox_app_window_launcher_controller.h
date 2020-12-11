@@ -24,7 +24,7 @@ namespace aura {
 class Window;
 }
 
-class ArcAppWindow;
+class AnboxAppWindow;
 class ArcAppWindowLauncherItemController;
 class ChromeLauncherController;
 
@@ -96,7 +96,7 @@ class AnboxAppWindowLauncherController : public AppWindowLauncherController,
   void HandlePlayStoreLaunch(AppWindowInfo* app_window_info);
 
   AppWindowInfo* GetAppWindowInfoForTask(int task_id);
-  ArcAppWindow* GetAppWindowForTask(int task_id);
+  AnboxAppWindow* GetAppWindowForTask(int task_id);
 
   void AttachControllerToWindowIfNeeded(aura::Window* window);
   void AttachControllerToWindowsIfNeeded();
