@@ -12,8 +12,14 @@
 #include "base/observer_list.h"
 
 #include "content/public/browser/browser_thread.h"
+#include "content/browser/browser_main_loop.h"
+#include "media/audio/audio_manager.h"
+#include "media/audio/audio_io.h"
 
 #include "anbox/common/wait_handle.h"
+#include "anbox/audio/sink.h"
+
+class Profile;
 
 namespace anbox{
 class Runtime;
@@ -27,6 +33,12 @@ namespace application{
 class Database;  
 }
 
+namespace protobuf{
+namespace bridge{
+class Application;
+}  
+}
+
 namespace network{
 class PublishedSocketConnector;
 }
@@ -37,28 +49,31 @@ class Channel;
 
 }
 
+namespace storage{
+class FileSystemURL; 
+}
+
+namespace media{
+class AudioOutputStream;
+}
+
 namespace arc {
 
+class AudioServer;
 
-class AnboxSession: public std::enable_shared_from_this<AnboxSession> {
-public:
-  struct AppInfo{
-    std::string name;
-    std::string package;
-    std::string component;
+class AnboxSession:
+  public std::enable_shared_from_this<AnboxSession> {
+// public:
+// friend class content::BrowserMainLoop;
 
-    AppInfo(const std::string &n, const std::string &p, const std::string &c):
-      name(n), package(p), component(c){}
-
-    AppInfo(){}  
-  };
-
+public:  
   class Observer {
   public:    
-    virtual void onAppAdded(void* pItem){}
-    virtual void onAppRemoved(void* pItem){}
+    virtual void onAppAdded(anbox::protobuf::bridge::Application* pItem){}
+    virtual void onAppRemoved(anbox::protobuf::bridge::Application* pItem){}
 
-    virtual void OnTaskCreated(int task_id, const AppInfo &app_info){}
+    virtual void OnTaskCreated(int task_id, const std::string &name, const std::string &package){}
+    virtual void OnTaskRemoved(int task_id){}
   };
 
 public:
@@ -66,8 +81,11 @@ public:
   ~AnboxSession();
 
 public:
-  void Initialize();
+  void Initialize(Profile* profile);
   bool LaunchApp(std::string &name, std::string &package, std::string &component);
+  bool InstallApp(const std::string &file_path);
+  void InstallApp2(const std::string &file_path);
+  void Close(int task_id);
   void OnAnboxInstanceStarted(bool result);
 
   // Adds or removes observers.
@@ -85,27 +103,25 @@ public:
     return observer_list_;
   }
 
-  void callback(){
-    LOG(INFO) << "==== AnboxSession launcher callback";
+  void callback(){    
     launch_wait_handle_.result_received();    
-  }
-
-  std::map<std::string, AppInfo>& GetLaunchedApps(){ return launched_apps_; }  
+  }    
 
 private:
   std::shared_ptr<anbox::Runtime> rt_;
+  std::shared_ptr<AudioServer> audio_server_;
   // std::shared_ptr<anbox::bridge::AndroidApiStub> android_api_stub_;  
   std::shared_ptr<anbox::network::PublishedSocketConnector> publish_socket_;
   std::shared_ptr<anbox::rpc::Channel> channel_;    
   base::ObserverList<Observer>::Unchecked observer_list_;
 
   mutable std::mutex mutex_;
-  anbox::common::WaitHandle launch_wait_handle_;
-
-  std::map<std::string, AppInfo> launched_apps_;  
+  anbox::common::WaitHandle launch_wait_handle_;    
 
   // WeakPtrFactory to use callbacks.
   base::WeakPtrFactory<AnboxSession> weak_factory_{this};
+
+  Profile* profile_;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(AnboxSession);
