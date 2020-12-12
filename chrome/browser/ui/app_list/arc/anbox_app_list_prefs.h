@@ -35,6 +35,14 @@
 
 #include "anbox/application/database.h"
 
+namespace anbox{
+namespace protobuf{
+namespace bridge{
+class Application;
+}  
+}
+}
+
 class PrefService;
 class Profile;
 
@@ -246,6 +254,7 @@ class AnboxAppListPrefs : public KeyedService,
   // the app which has a matching |package_name|. This id is safe to use in file
   // paths and as preference keys.
   std::string GetAppIdByPackageName(const std::string& package_name) const;
+  std::string GetActivityByPackageName(const std::string& package_name) const;
 
   // It is called from chrome/browser/prefs/browser_prefs.cc.
   static void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry);
@@ -313,9 +322,10 @@ class AnboxAppListPrefs : public KeyedService,
   // arc::ArcSessionManager::Observer:
   // void OnArcPlayStoreEnabledChanged(bool enabled) override;
 
-  void onAppAdded(void *pItem) override;  
-  void onAppRemoved(void *pItem) override;  
-  void OnTaskCreated(int task_id, const arc::AnboxSession::AppInfo &app_info) override;  
+  void onAppAdded(anbox::protobuf::bridge::Application *pItem) override;  
+  void onAppRemoved(anbox::protobuf::bridge::Application *pItem) override;  
+  void OnTaskCreated(int task_id, const std::string &name, const std::string &package) override;  
+  void OnTaskRemoved(int task_id) override;  
 
   // KeyedService:
   void Shutdown() override;
