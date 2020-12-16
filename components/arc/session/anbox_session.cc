@@ -113,7 +113,7 @@ public:
     );    
     
     audio_out_stream_->Open();
-    audio_out_stream_->SetVolume(0.5);
+    // audio_out_stream_->SetVolume(0.5);
 
     audio_out_stream_->Start(this);
     // audio_out_stream_->Start(new media::BeepingSource(media::AudioParameters(
@@ -140,12 +140,12 @@ public:
     std::unique_lock<std::mutex> l(lock_);
     //int wanted = media::AudioBus::CalculateMemorySize(2, dest->frames());
     int wanted = dest->frames() * dest->channels() * sizeof(int16_t);
-    std::unique_ptr<char []> dst;    
+    std::unique_ptr<uint8_t[]> dst;    
     int count = 0;
 
     while (count < wanted) {
       if (dst.get() == nullptr){        
-        dst = std::make_unique<char[]>(wanted);
+        dst = std::make_unique<uint8_t[]>(wanted);
       }
       if (read_buffer_left_ > 0) {
         size_t avail = std::min<size_t>(wanted - count, read_buffer_left_);        
@@ -178,7 +178,7 @@ public:
       LOG(INFO) << "==== AnboxSession::OnMoreData frames " << use_frames;
       dest->FromInterleaved<media::SignedInt16SampleTypeTraits>((int16_t*)dst.get(), use_frames);
 
-      media::AudioBus::WrapMemory(2, use_frames, dst.get())->CopyTo(dest);      
+      // media::AudioBus::WrapMemory(2, use_frames, dst.get())->CopyTo(dest);      
     }    
     
     return use_frames;
