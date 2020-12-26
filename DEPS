@@ -3508,7 +3508,7 @@ deps = {
   # === ANDROID_DEPS Generated Code End ===
 
   'src/third_party/anbox': 
-    Var('github_git') + '/FydeOS/anbox_fydeos.git@master',
+    Var('github_git') + '/FydeOS-ArcHero/anbox_fydeos.git@master',
 
   'src/third_party/boost':   
     Var('github_git') + '/boostorg/boost.git@436ad1dfcfc7e0246141beddd11c8a4e9c10b146',    #1.65.1
