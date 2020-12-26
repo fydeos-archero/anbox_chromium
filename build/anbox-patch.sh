@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd ./src/third_party/boost
+git submodule init
 git submodule update
 cd -
 
