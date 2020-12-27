@@ -15,6 +15,7 @@
 #include "chrome/browser/ui/app_list/app_list_controller_delegate.h"
 #include "chrome/browser/ui/app_list/app_service/app_service_context_menu.h"
 #include "chrome/browser/ui/app_list/arc/arc_app_context_menu.h"
+#include "chrome/browser/ui/app_list/arc/anbox_app_context_menu.h"
 #include "chrome/browser/ui/app_list/crostini/crostini_app_context_menu.h"
 #include "chrome/browser/ui/app_list/extension_app_context_menu.h"
 #include "chrome/browser/ui/app_list/web_app_context_menu.h"
@@ -38,6 +39,7 @@ std::unique_ptr<app_list::AppContextMenu> AppServiceAppItem::MakeAppContextMenu(
                                                     controller);
   }
 
+  LOG(INFO) << "=== AppServiceAppItem::MakeAppContextMenu " << app_type;
   switch (app_type) {
     case apps::mojom::AppType::kUnknown:
     case apps::mojom::AppType::kBuiltIn:
@@ -48,9 +50,8 @@ std::unique_ptr<app_list::AppContextMenu> AppServiceAppItem::MakeAppContextMenu(
       return std::make_unique<ArcAppContextMenu>(delegate, profile, app_id,
                                                  controller);
     case apps::mojom::AppType::kAnbox:                                             
-      LOG(INFO) << "======= AppServiceAppItem::MakeAppContextMenu - wait for implementation";
-      return nullptr;
-
+      return std::make_unique<AnboxAppContextMenu>(delegate, profile, app_id,
+                                                 controller);
     case apps::mojom::AppType::kCrostini:
       return std::make_unique<CrostiniAppContextMenu>(profile, app_id,
                                                       controller);
