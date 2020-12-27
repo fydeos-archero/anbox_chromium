@@ -2081,8 +2081,19 @@ void AnboxAppListPrefs::onAppAdded(anbox::protobuf::bridge::Application *pItem){
 }
 
 void AnboxAppListPrefs::onAppRemoved(anbox::protobuf::bridge::Application *pItem){  
-
-  LOG(INFO) << "======== AnboxAppListPrefs::onAppRemoved " << pItem->name();
+  LOG(INFO) << "======== AnboxAppListPrefs::onAppRemoved " << pItem->package() << " " << pItem->launch_intent().component();  
+  
+  // auto app_id = GetAppId(pItem->package(), pItem->launch_intent().component());
+  auto app_id = GetAppIdByPackageName(pItem->package());
+  if (app_id.length() > 0){
+    file_task_runner_->PostTask(FROM_HERE,
+      base::BindOnce(
+        &AnboxAppListPrefs::RemoveApp, 
+        weak_ptr_factory_.GetWeakPtr(), 
+        std::string(app_id)
+      )
+    );
+  }
 }
 
 void AnboxAppListPrefs::OnTaskCreated(int task_id, const std::string &name, const std::string &package){    
