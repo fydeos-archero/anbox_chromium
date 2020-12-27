@@ -553,7 +553,7 @@ void AnboxApps::Launch(const std::string& app_id,
                      int32_t event_flags,
                      apps::mojom::LaunchSource launch_source,
                      int64_t display_id) {
-  LOG(INFO) << "====== AnboxApps::Launch " << app_id;
+  LOG(INFO) << "====== AnboxApps::Launch " << app_id;  
 
   auto user_interaction_type = GetUserInterationType(launch_source);
   if (!user_interaction_type.has_value()) {
@@ -685,9 +685,15 @@ void AnboxApps::SetPermission(const std::string& app_id,
 
 void AnboxApps::Uninstall(const std::string& app_id,
                         bool clear_site_data,
-                        bool report_abuse) {
-  LOG(INFO) << "====== AnboxApps::Uninstall " << app_id;                        
-  arc::UninstallArcApp(app_id, profile_);
+                        bool report_abuse) {    
+  // AnboxAppListPrefs* anbox_prefs = AnboxAppListPrefs::Get(profile_);
+
+  std::unique_ptr<AnboxAppListPrefs::AppInfo> app_info = AnboxAppListPrefs::Get(profile_)->GetApp(app_id);  
+
+  LOG(INFO) << "====== AnboxApps::Uninstall " << app_id << " " 
+    << app_info->name << " " << app_info->package_name  << " " << app_info->activity;    
+
+  arc::AnboxSessionManager::Get()->GetAnboxSession()->Uninstall(app_info->package_name, app_info->activity);
 }
 
 void AnboxApps::PauseApp(const std::string& app_id) {
@@ -716,7 +722,7 @@ void AnboxApps::GetMenuModel(const std::string& app_id,
                            apps::mojom::MenuType menu_type,
                            int64_t display_id,
                            GetMenuModelCallback callback) {
-  LOG(INFO) << "====== AnboxApps::GetMenuModel " << app_id;                        
+  LOG(INFO) << "====== AnboxApps::GetMenuModel " << app_id;
 
   AnboxAppListPrefs* prefs = AnboxAppListPrefs::Get(profile_);
   if (!prefs) {
@@ -1225,6 +1231,11 @@ void AnboxApps::UpdateAppIntentFilters(
 void AnboxApps::BuildMenuForShortcut(const std::string& package_name,
                                    apps::mojom::MenuItemsPtr menu_items,
                                    GetMenuModelCallback callback) {
+  if (package_name.length() > 0){
+    std::move(callback).Run(std::move(menu_items));
+    return;
+  }
+
   LOG(INFO) << "====== AnboxApps::BuildMenuForShortcut ";
 
   // The previous request is cancelled, and start a new request if the callback

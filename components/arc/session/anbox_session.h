@@ -85,6 +85,7 @@ public:
   bool LaunchApp(std::string &name, std::string &package, std::string &component);
   bool InstallApp(const std::string &file_path);
   void InstallApp2(const std::string &file_path);
+  void Uninstall(const std::string &package, const std::string &component);
   void Close(int task_id);
   void OnAnboxInstanceStarted(bool result);
 

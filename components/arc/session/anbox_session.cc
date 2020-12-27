@@ -286,7 +286,7 @@ class PlatformMessageProcessor2:
   void app_removed(anbox::protobuf::bridge::Application const *request,
                                      anbox::protobuf::rpc::Void *response,
                                      google::protobuf::Closure *done) {
-    LOG(INFO) << "===== PlatformMessageProcessor2::app_removed " << request->name() << " " << request->package() << " " << request->icon().size();                                   
+    LOG(INFO) << "===== PlatformMessageProcessor2::app_removed " << request->package() << " " << request->launch_intent().component();
 
     for (auto& observer: anbox_session_->GetObserver()){
       observer.onAppRemoved(const_cast<anbox::protobuf::bridge::Application*>(request));
@@ -487,6 +487,30 @@ void AnboxSession::InstallApp2(const std::string &file_path){
 
     launch_wait_handle_.wait_for_pending(std::chrono::milliseconds{30 * 1000});
   }    
+}
+
+void AnboxSession::Uninstall(const std::string &package, const std::string &component){
+  LOG(INFO) << "====== AnboxSession::Uninstall " << package << " " << component;
+
+  {
+    std::lock_guard<decltype(mutex_)> lock(mutex_);
+    launch_wait_handle_.expect_result();
+  }
+
+  auto c = std::make_shared<anbox::protobuf::rpc::Void>();    
+  anbox::protobuf::chrome::UninstallApp message;  
+  message.set_package_name(package);
+  message.set_component_name(component);
+
+  channel_->call_method(
+    "uninstall_app", &message, c.get(),
+    google::protobuf::NewCallback(this, &AnboxSession::callback)
+  );
+
+  launch_wait_handle_.wait_for_pending(std::chrono::milliseconds{30 * 1000});
+  if (!launch_wait_handle_.has_result()){    
+    LOG(INFO) <<  "====== AnboxSession::Uninstall failed ";
+  }
 }
 
 void AnboxSession::Close(int task_id){

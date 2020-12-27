@@ -37,6 +37,7 @@
 
 #if defined(OS_CHROMEOS)
 #include "chrome/browser/ui/app_list/arc/arc_app_list_prefs.h"
+#include "chrome/browser/ui/app_list/arc/anbox_app_list_prefs.h"
 #endif
 
 namespace {
@@ -158,7 +159,11 @@ void AppUninstallDialogView::InitializeView(Profile* profile,
 #endif
       break;
     case apps::mojom::AppType::kAnbox:
-      LOG(INFO) << "======== AppUninstallDialogView::InitializeView - wait for implementation";      
+#if defined(OS_CHROMEOS)
+      InitializeViewForAnboxApp(profile, app_id);
+#else
+      NOTREACHED();
+#endif
       break;
     case apps::mojom::AppType::kCrostini:
 #if defined(OS_CHROMEOS)
@@ -300,6 +305,32 @@ void AppUninstallDialogView::InitializeViewForArcApp(
   DCHECK(arc_prefs);
 
   std::unique_ptr<ArcAppListPrefs::AppInfo> app_info =
+      arc_prefs->GetApp(app_id);
+  DCHECK(app_info);
+
+  shortcut_ = app_info->shortcut;
+
+  if (shortcut_) {
+    DialogDelegate::SetButtonLabel(
+        ui::DIALOG_BUTTON_OK,
+        l10n_util::GetStringUTF16(IDS_EXTENSION_PROMPT_UNINSTALL_BUTTON));
+  } else {
+    base::string16 subheading_text = l10n_util::GetStringUTF16(
+        IDS_ARC_APP_UNINSTALL_PROMPT_DATA_REMOVAL_WARNING);
+    auto* label = AddChildView(std::make_unique<views::Label>(subheading_text));
+    label->SetMultiLine(true);
+    label->SetHorizontalAlignment(gfx::ALIGN_LEFT);
+    label->SetAllowCharacterBreak(true);
+  }
+}
+
+void AppUninstallDialogView::InitializeViewForAnboxApp(
+    Profile* profile,
+    const std::string& app_id) {
+  AnboxAppListPrefs* arc_prefs = AnboxAppListPrefs::Get(profile);
+  DCHECK(arc_prefs);
+
+  std::unique_ptr<AnboxAppListPrefs::AppInfo> app_info =
       arc_prefs->GetApp(app_id);
   DCHECK(app_info);
 
