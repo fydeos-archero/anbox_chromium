@@ -1945,7 +1945,7 @@ jumbo_static_library("browser") {
     "//build/config/compiler:wexit_time_destructors",
     "//build/config:precompiled_headers",
   ]
-  configs += [ "//third_party/anbox:anbox_headers" ]
+  configs += [ "//third_party/archero/libarchero:libarchero_headers" ]
 
   defines = [ "ZLIB_CONST" ]
   libs = []

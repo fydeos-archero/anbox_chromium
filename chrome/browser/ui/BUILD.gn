@@ -360,7 +360,7 @@ jumbo_static_library("ui") {
   configs += [
     "//build/config:precompiled_headers",
     "//build/config/compiler:wexit_time_destructors",
-  ]  
+  ]
 
   # Since browser and browser_ui actually depend on each other,
   # we must omit the dependency from browser_ui to browser.
@@ -3699,7 +3699,7 @@ jumbo_static_library("ui") {
   }
 
   if (is_chromeos) {
-    configs += [ "//third_party/anbox:anbox_headers" ]    
+    configs += [ "//third_party/archero/libarchero:libarchero_headers" ]
 
     sources += [
       "app_icon_loader_delegate.h",
@@ -3938,7 +3938,7 @@ jumbo_static_library("ui") {
       "ash/launcher/app_service/app_service_app_window_arc_tracker.h",
 
       "ash/launcher/app_service/app_service_app_window_anbox_tracker.cc",
-      "ash/launcher/app_service/app_service_app_window_anbox_tracker.h",      
+      "ash/launcher/app_service/app_service_app_window_anbox_tracker.h",
 
       "ash/launcher/app_service/app_service_app_window_crostini_tracker.cc",
       "ash/launcher/app_service/app_service_app_window_crostini_tracker.h",
@@ -3969,7 +3969,7 @@ jumbo_static_library("ui") {
       "ash/launcher/arc_app_window_launcher_controller.h",
 
       "ash/launcher/anbox_app_window_launcher_controller.cc",
-      "ash/launcher/anbox_app_window_launcher_controller.h",      
+      "ash/launcher/anbox_app_window_launcher_controller.h",
 
       "ash/launcher/arc_app_window_launcher_item_controller.cc",
       "ash/launcher/arc_app_window_launcher_item_controller.h",

@@ -19,8 +19,7 @@ source_set("chromeos") {
   assert(enable_extensions, "ChromeOS Chrome has to be built with extensions")
 
   configs += [ "//build/config/compiler:wexit_time_destructors" ]
-  configs += [ "//third_party/anbox:anbox_headers" ]    
-  configs += [ "//third_party/anbox:clang_warnings" ]
+  configs += [ "//third_party/archero/libarchero:libarchero_headers" ]
   #configs += [ "//third_party/properties-cpp:properties_cpp_config" ]
 
   public_deps = [
@@ -306,7 +305,6 @@ source_set("chromeos") {
     "//third_party/re2",
     "//third_party/zlib",
     "//third_party/zlib/google:compression_utils",
-    "//third_party/anbox:anbox_sdk",    
     "//ui/accessibility",
     "//ui/aura",
     "//ui/base",
