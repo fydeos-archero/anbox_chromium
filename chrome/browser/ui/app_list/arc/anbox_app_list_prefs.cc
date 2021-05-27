@@ -51,7 +51,7 @@
 #include "ui/base/layout.h"
 #include "ui/gfx/codec/png_codec.h"
 
-#include "anbox_bridge.pb.h"
+#include "archero_bridge.h"
 
 namespace {
 
@@ -123,11 +123,11 @@ class NotificationsEnabledDeferred {
 };
 
 bool InstallIconFromFileThread(const base::FilePath& icon_path,
-                                const std::string& content_png) {                               
-  LOG(INFO) << "==== InstallIconFromFileThread " << icon_path << " " << content_png.size();                       
+                                const std::string& content_png) {
+  LOG(INFO) << "==== InstallIconFromFileThread " << icon_path << " " << content_png.size();
   DCHECK(!content_png.empty());
 
-  base::CreateDirectory(icon_path.DirName());  
+  base::CreateDirectory(icon_path.DirName());
 
   int wrote =
       base::WriteFile(icon_path, reinterpret_cast<const char*>(&content_png[0]),
@@ -316,7 +316,7 @@ std::string AnboxAppListPrefs::GetActivityByPackageName(
       continue;
 
     const base::Value* activity_name =
-        value.FindKeyOfType(kActivity, base::Value::Type::STRING);        
+        value.FindKeyOfType(kActivity, base::Value::Type::STRING);
     return activity_name ? activity_name->GetString() : std::string();
   }
   return std::string();
@@ -386,12 +386,12 @@ class AnboxAppListPrefs::ResizeRequest : public ImageDecoder::ImageRequest {
 
 AnboxAppListPrefs::AnboxAppListPrefs(Profile* profile)
     : profile_(profile),
-      prefs_(profile->GetPrefs()),      
+      prefs_(profile->GetPrefs()),
       file_task_runner_(base::ThreadPool::CreateSequencedTaskRunner(
           {base::MayBlock(), base::TaskPriority::BEST_EFFORT,
            base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN})) {
 
-  LOG(INFO) << "======== AnboxAppListPrefs::AnboxAppListPrefs";           
+  LOG(INFO) << "======== AnboxAppListPrefs::AnboxAppListPrefs";
   VLOG(1) << "ARC app list prefs created";
   DCHECK(profile);
   DCHECK(content::BrowserThread::CurrentlyOn(content::BrowserThread::UI));
@@ -413,7 +413,7 @@ AnboxAppListPrefs::AnboxAppListPrefs(Profile* profile)
   DCHECK(arc::IsArcAllowedForProfile(profile));
 
   const std::vector<std::string> existing_app_ids = GetAppIds();
-  tracked_apps_.insert(existing_app_ids.begin(), existing_app_ids.end());  
+  tracked_apps_.insert(existing_app_ids.begin(), existing_app_ids.end());
 }
 
 AnboxAppListPrefs::~AnboxAppListPrefs() {
@@ -425,12 +425,12 @@ AnboxAppListPrefs::~AnboxAppListPrefs() {
   //   return;
   // DCHECK(arc::ArcServiceManager::Get());
   // arc_session_manager->RemoveObserver(this);
-  
+
   arc::AnboxSessionManager* anbox_session_manager = arc::AnboxSessionManager::Get();
-  if (anbox_session_manager){    
-    anbox_session_manager->GetAnboxSession()->RemoveObserver(this);
+  if (anbox_session_manager){
+    anbox_session_manager->GetAnboxSession()->set_bridge_observer(nullptr);
   }
-  
+
   // app_connection_holder()->RemoveObserver(this);
 }
 
@@ -461,9 +461,9 @@ void AnboxAppListPrefs::StartPrefs() {
   // }
 
   arc::AnboxSessionManager* anbox_session_manager = arc::AnboxSessionManager::Get();
-  if (anbox_session_manager){    
-    anbox_session_manager->GetAnboxSession()->AddObserver(this);
-  }  
+  if (anbox_session_manager){
+    anbox_session_manager->GetAnboxSession()->set_bridge_observer(this);
+  }
 
   VLOG(1) << "Registering host...";
 
@@ -481,7 +481,7 @@ base::FilePath AnboxAppListPrefs::MaybeGetIconPathForDefaultApp(
     const std::string& app_id,
     const ArcAppIconDescriptor& descriptor) const {
 
-  return base::FilePath();  
+  return base::FilePath();
   // const ArcDefaultAppList::AppInfo* default_app = default_apps_->GetApp(app_id);
   // if (!default_app || default_app->app_path.empty())
   //   return base::FilePath();
@@ -726,7 +726,7 @@ std::vector<std::string> AnboxAppListPrefs::GetAppIds() const {
 
     //     LOG(INFO) << "===== AnboxAppListPrefs::GetAppIds " << default_app.first;
     //   }
-    // }    
+    // }
     return ids;
   }
   return GetAppIdsNoArcEnabledCheck();
@@ -766,7 +766,7 @@ std::unique_ptr<AnboxAppListPrefs::AppInfo> AnboxAppListPrefs::GetApp(
 std::unique_ptr<AnboxAppListPrefs::AppInfo> AnboxAppListPrefs::GetAppFromPrefs(
     const std::string& app_id) const {
   const base::DictionaryValue* app = nullptr;
-  const base::DictionaryValue* apps =  
+  const base::DictionaryValue* apps =
       prefs_->GetDictionary(arc::prefs::kArcApps);
   if (!apps || !apps->GetDictionaryWithoutPathExpansion(app_id, &app))
     return std::unique_ptr<AppInfo>();
@@ -823,9 +823,9 @@ bool AnboxAppListPrefs::IsRegistered(const std::string& app_id) const {
   return apps && apps->GetDictionaryWithoutPathExpansion(app_id, &app);
 }
 
-bool AnboxAppListPrefs::IsDefault(const std::string& app_id) const {  
+bool AnboxAppListPrefs::IsDefault(const std::string& app_id) const {
   return false;
-  // LOG(INFO) << "===== AnboxAppListPrefs::IsDefault " << app_id;  
+  // LOG(INFO) << "===== AnboxAppListPrefs::IsDefault " << app_id;
 
   // return default_apps_->HasApp(app_id);
 }
@@ -844,7 +844,7 @@ bool AnboxAppListPrefs::IsShortcut(const std::string& app_id) const {
 }
 
 void AnboxAppListPrefs::SetLastLaunchTime(const std::string& app_id) {
-#if 0  
+#if 0
   LOG(INFO) << "===== AnboxAppListPrefs::SetLastLaunchTime-0";
   if (!IsRegistered(app_id)) {
     NOTREACHED();
@@ -866,12 +866,12 @@ void AnboxAppListPrefs::SetLastLaunchTime(const std::string& app_id) {
   app_dict->SetString(kLastLaunchTime, string_value);
 
   for (auto& observer : observer_list_){
-    LOG(INFO) << "===== AnboxAppListPrefs::SetLastLaunchTime-3";  
+    LOG(INFO) << "===== AnboxAppListPrefs::SetLastLaunchTime-3";
     observer.OnAppLastLaunchTimeUpdated(app_id);
   }
 
   if (first_launch_app_request_) {
-    LOG(INFO) << "===== AnboxAppListPrefs::SetLastLaunchTime-4";  
+    LOG(INFO) << "===== AnboxAppListPrefs::SetLastLaunchTime-4";
     first_launch_app_request_ = false;
     // UI Shown time may not be set in unit tests.
     const user_manager::UserManager* user_manager =
@@ -883,14 +883,14 @@ void AnboxAppListPrefs::SetLastLaunchTime(const std::string& app_id) {
              ->ui_shown_time()
              .is_null()) {
 
-          LOG(INFO) << "===== AnboxAppListPrefs::SetLastLaunchTime-5";       
+          LOG(INFO) << "===== AnboxAppListPrefs::SetLastLaunchTime-5";
       UMA_HISTOGRAM_CUSTOM_TIMES(
           "Arc.FirstAppLaunchRequest.TimeDelta",
           time - chromeos::UserSessionManager::GetInstance()->ui_shown_time(),
           base::TimeDelta::FromSeconds(1), base::TimeDelta::FromMinutes(2), 20);
     }
   }
-#endif  
+#endif
 }
 
 void AnboxAppListPrefs::DisableAllApps() {
@@ -1012,7 +1012,7 @@ void AnboxAppListPrefs::OnDefaultAppsReady() {
   StartPrefs();
 }
 
-void AnboxAppListPrefs::Shutdown() {  
+void AnboxAppListPrefs::Shutdown() {
 }
 
 void AnboxAppListPrefs::RegisterDefaultApps() {
@@ -1114,7 +1114,7 @@ void AnboxAppListPrefs::SimulateDefaultAppAvailabilityTimeoutForTesting() {
 void AnboxAppListPrefs::HandleTaskCreated(const base::Optional<std::string>& name,
                                         const std::string& package_name,
                                         const std::string& activity) {
-                                          
+
   DCHECK(IsArcAndroidEnabledForProfile(profile_));
   const std::string app_id = GetAppId(package_name, activity);
   if (IsRegistered(app_id)) {
@@ -1169,7 +1169,7 @@ void AnboxAppListPrefs::AddAppAndShortcut(const std::string& name,
   // Add "(beta)" string to Play Store. See crbug.com/644576 for details.
   if (app_id == arc::kPlayStoreAppId)
     updated_name = l10n_util::GetStringUTF8(IDS_ARC_PLAYSTORE_ICON_TITLE_BETA);
-    
+
   const bool was_tracked = tracked_apps_.count(app_id);
   std::unique_ptr<AnboxAppListPrefs::AppInfo> app_old_info;
   if (was_tracked) {
@@ -1303,7 +1303,7 @@ void AnboxAppListPrefs::RemoveApp(const std::string& app_id) {
 }
 
 arc::ConnectionHolder<arc::mojom::AppInstance, arc::mojom::AppHost>*
-AnboxAppListPrefs::app_connection_holder() {  
+AnboxAppListPrefs::app_connection_holder() {
   auto* arc_service_manager = arc::ArcServiceManager::Get();
   // The null check is for unit tests. On production, |arc_service_manager| is
   // always non-null.
@@ -1339,7 +1339,7 @@ void AnboxAppListPrefs::AddOrUpdatePackagePrefs(
   package_dict->SetString(kLastBackupTime, time_str);
   package_dict->SetBoolean(kSystem, package.system);
   package_dict->SetBoolean(kUninstalled, false);
-  package_dict->SetBoolean(kVPNProvider, package.vpn_provider);  
+  package_dict->SetBoolean(kVPNProvider, package.vpn_provider);
 
   base::DictionaryValue permissions_dict;
   if (package.permission_states.has_value()) {
@@ -1471,7 +1471,7 @@ void AnboxAppListPrefs::DetectDefaultAppAvailability() {
   // }
 }
 
-void AnboxAppListPrefs::MaybeSetDefaultAppLoadingTimeout() {  
+void AnboxAppListPrefs::MaybeSetDefaultAppLoadingTimeout() {
   // Find at least one not installed default app package.
   // for (const auto& package : default_apps_->GetActivePackages()) {
   //   if (!GetPackage(package)) {
@@ -1627,7 +1627,7 @@ std::unordered_set<std::string> AnboxAppListPrefs::GetAppsForPackage(
                                        false, /* include_only_launchable_apps */
                                        false /* include_shortcuts */))    {
 
-    LOG(INFO) << "AnboxAppListPrefs::GetAppsForPackage-1 " << package_name << " " << n;                                     
+    LOG(INFO) << "AnboxAppListPrefs::GetAppsForPackage-1 " << package_name << " " << n;
   }
 
   return GetAppsAndShortcutsForPackage(package_name,
@@ -1753,9 +1753,9 @@ void AnboxAppListPrefs::OnTaskCreated(int32_t task_id,
                            intent.value_or(std::string()));
   }
 
-  // base::ThreadPool::PostTask(FROM_HERE, {base::MayBlock()},  
+  // base::ThreadPool::PostTask(FROM_HERE, {base::MayBlock()},
   //   base::BindOnce(
-  //     &AnboxAppListPrefs::OnTaskSetActive, 
+  //     &AnboxAppListPrefs::OnTaskSetActive,
   //     weak_ptr_factory_.GetWeakPtr(), task_id)
   // );
 }
@@ -1922,11 +1922,11 @@ base::Time AnboxAppListPrefs::GetInstallTime(const std::string& app_id) const {
 
 void AnboxAppListPrefs::InstallIcon(const std::string& app_id,
                                   const ArcAppIconDescriptor& descriptor,
-                                  const std::vector<uint8_t>& content_png) {  
-  const base::FilePath icon_path = GetIconPath(app_id, descriptor);  
+                                  const std::vector<uint8_t>& content_png) {
+  const base::FilePath icon_path = GetIconPath(app_id, descriptor);
 
   LOG(INFO) << "==== AnboxAppListPrefs::InstallIcon " << app_id << " " << icon_path << " " << content_png.size();
- 
+
   // base::PostTaskAndReplyWithResult(
   //     file_task_runner_.get(), FROM_HERE,
   //     base::BindOnce(&InstallIconFromFileThread, icon_path, content_png),
@@ -1937,7 +1937,7 @@ void AnboxAppListPrefs::InstallIcon(const std::string& app_id,
 void AnboxAppListPrefs::OnIconInstalled(const std::string& app_id,
                                       const ArcAppIconDescriptor& descriptor,
                                       bool install_succeed) {
-  LOG(INFO) << "==== AnboxAppListPrefs::OnIconInstalled " << app_id << " " << install_succeed;                                      
+  LOG(INFO) << "==== AnboxAppListPrefs::OnIconInstalled " << app_id << " " << install_succeed;
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
   if (!install_succeed)
     return;
@@ -1999,8 +1999,8 @@ void AnboxAppListPrefs::NotifyAppStatesChanged(const std::string& app_id) {
     observer.OnAppStatesChanged(app_id, *app_info);
 }
 
-void AnboxAppListPrefs::onAppAdded(anbox::protobuf::bridge::Application *pItem){    
-  LOG(INFO) << "======== AnboxAppListPrefs::onAppAdded " << 
+void AnboxAppListPrefs::onAppAdded(archero::protobuf::bridge::Application *pItem){
+  LOG(INFO) << "======== AnboxAppListPrefs::onAppAdded " <<
     pItem->name() << " " << pItem->launch_intent().action() << " " <<
     pItem->launch_intent().component();
 
@@ -2018,8 +2018,8 @@ void AnboxAppListPrefs::onAppAdded(anbox::protobuf::bridge::Application *pItem){
   // base::ThreadPool::PostTask(FROM_HERE, {base::MayBlock()},
   file_task_runner_->PostTask(FROM_HERE,
     base::BindOnce(
-      &AnboxAppListPrefs::AddAppAndShortcut, 
-      weak_ptr_factory_.GetWeakPtr(), 
+      &AnboxAppListPrefs::AddAppAndShortcut,
+      weak_ptr_factory_.GetWeakPtr(),
       std::string(pItem->name()), std::string(pItem->package()), std::string(pItem->launch_intent().component()),
       std::string() /* intent_uri */, std::string() /* icon_resource_id */,
       false /*app->smticky*/, false/*app->notifications_enabled*/, true /* app_ready */,
@@ -2043,7 +2043,7 @@ void AnboxAppListPrefs::onAppAdded(anbox::protobuf::bridge::Application *pItem){
   //       false /*app->sticky*/, false/*app->notifications_enabled*/, true /* app_ready */,
   //       false /*app->suspended*/, false /* shortcut */, true /* launchable */);
 
-  // AnboxAppInfo appInfo;  
+  // AnboxAppInfo appInfo;
   // appInfo.name = pAppItem->name;
   // appInfo.package = pAppItem->package;
   // appInfo.launch_intent.action = pAppItem->launch_intent.action;
@@ -2052,19 +2052,19 @@ void AnboxAppListPrefs::onAppAdded(anbox::protobuf::bridge::Application *pItem){
   // appInfo.launch_intent.flags = pAppItem->launch_intent.flags;
   // appInfo.launch_intent.package = pAppItem->launch_intent.package;
   // appInfo.launch_intent.type = pAppItem->launch_intent.type;
-  // appInfo.launch_intent.uri = pAppItem->launch_intent.uri;    
+  // appInfo.launch_intent.uri = pAppItem->launch_intent.uri;
 
   // appInfo.icon2.resize(pAppItem->icon.size());
   // std::transform(pAppItem->icon.begin(), pAppItem->icon.end(), appInfo.icon2.begin(), [](char v) {
   //   return static_cast<uint8_t>(v);
-  // });  
+  // });
 
   // InstallIcon(
-  //   GetAppId(appInfo.package, appInfo.launch_intent.action), 
-  //   ArcAppIconDescriptor{20, ui::ScaleFactor::SCALE_FACTOR_100P}, 
+  //   GetAppId(appInfo.package, appInfo.launch_intent.action),
+  //   ArcAppIconDescriptor{20, ui::ScaleFactor::SCALE_FACTOR_100P},
   //   appInfo.icon2
   // );
-  
+
   // auto app_id = GetAppId(appInfo.package, appInfo.launch_intent.action);
   // app_list_.insert({app_id, appInfo});
 
@@ -2080,23 +2080,23 @@ void AnboxAppListPrefs::onAppAdded(anbox::protobuf::bridge::Application *pItem){
   // }
 }
 
-void AnboxAppListPrefs::onAppRemoved(anbox::protobuf::bridge::Application *pItem){  
-  LOG(INFO) << "======== AnboxAppListPrefs::onAppRemoved " << pItem->package() << " " << pItem->launch_intent().component();  
-  
+void AnboxAppListPrefs::onAppRemoved(archero::protobuf::bridge::Application *pItem){
+  LOG(INFO) << "======== AnboxAppListPrefs::onAppRemoved " << pItem->package() << " " << pItem->launch_intent().component();
+
   // auto app_id = GetAppId(pItem->package(), pItem->launch_intent().component());
   auto app_id = GetAppIdByPackageName(pItem->package());
   if (app_id.length() > 0){
     file_task_runner_->PostTask(FROM_HERE,
       base::BindOnce(
-        &AnboxAppListPrefs::RemoveApp, 
-        weak_ptr_factory_.GetWeakPtr(), 
+        &AnboxAppListPrefs::RemoveApp,
+        weak_ptr_factory_.GetWeakPtr(),
         std::string(app_id)
       )
     );
   }
 }
 
-void AnboxAppListPrefs::OnTaskCreated(int task_id, const std::string &name, const std::string &package){    
+void AnboxAppListPrefs::OnTaskCreated(int task_id, const std::string &name, const std::string &package){
   OnTaskCreated(task_id, package, GetActivityByPackageName(package), name, base::nullopt);
 }
 

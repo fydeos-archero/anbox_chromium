@@ -33,13 +33,11 @@
 #include "components/keyed_service/core/keyed_service.h"
 #include "ui/base/layout.h"
 
-#include "anbox/application/database.h"
-
 namespace anbox{
 namespace protobuf{
 namespace bridge{
 class Application;
-}  
+}
 }
 }
 
@@ -75,8 +73,8 @@ class ArcAppShortcutsSearchProviderTest;
 // NOTE: AnboxAppListPrefs is only created for the primary user.
 class AnboxAppListPrefs : public KeyedService,
                         public arc::mojom::AppHost,
-                        // public arc::ConnectionObserver<arc::mojom::AppInstance>,                        
-                        public arc::AnboxSession::Observer {
+                        // public arc::ConnectionObserver<arc::mojom::AppInstance>,
+                        public archero::ArcHeroBridge::Observer {
  public:
   struct AppInfo {
     AppInfo(const std::string& name,
@@ -118,16 +116,16 @@ class AnboxAppListPrefs : public KeyedService,
     bool shortcut;
     // Whether app can be launched. In some case we cannot launch an app because
     // it requires parameters we might not provide.
-    bool launchable;    
+    bool launchable;
 
     static void SetIgnoreCompareInstallTimeForTesting(bool ignore);
 
     bool operator==(const AppInfo& other) const;
   };
 
-  struct AnboxAppInfo: anbox::application::Database::Item{
-    std::vector<uint8_t> icon2;
-  };
+  // struct AnboxAppInfo: anbox::application::Database::Item{
+  //   std::vector<uint8_t> icon2;
+  // };
 
   struct PackageInfo {
     PackageInfo(const std::string& package_name,
@@ -310,7 +308,7 @@ class AnboxAppListPrefs : public KeyedService,
   // Returns true if app is an OEM app.
   bool IsOem(const std::string& app_id) const;
   // Returns true if app is a shortcut
-  bool IsShortcut(const std::string& app_id) const;  
+  bool IsShortcut(const std::string& app_id) const;
 
   void AddObserver(Observer* observer);
   void RemoveObserver(Observer* observer);
@@ -322,10 +320,10 @@ class AnboxAppListPrefs : public KeyedService,
   // arc::ArcSessionManager::Observer:
   // void OnArcPlayStoreEnabledChanged(bool enabled) override;
 
-  void onAppAdded(anbox::protobuf::bridge::Application *pItem) override;  
-  void onAppRemoved(anbox::protobuf::bridge::Application *pItem) override;  
-  void OnTaskCreated(int task_id, const std::string &name, const std::string &package) override;  
-  void OnTaskRemoved(int task_id) override;  
+  void onAppAdded(archero::protobuf::bridge::Application *pItem) override;
+  void onAppRemoved(archero::protobuf::bridge::Application *pItem) override;
+  void OnTaskCreated(int task_id, const std::string &name, const std::string &package) override;
+  void OnTaskRemoved(int task_id) override;
 
   // KeyedService:
   void Shutdown() override;
@@ -541,7 +539,7 @@ class AnboxAppListPrefs : public KeyedService,
   Profile* const profile_;
 
   // Owned by the BrowserContext.
-  PrefService* const prefs_;  
+  PrefService* const prefs_;
 
   // List of observers.
   base::ObserverList<Observer>::Unchecked observer_list_;
@@ -587,15 +585,15 @@ class AnboxAppListPrefs : public KeyedService,
 
   arc::ArcPackageSyncableService* sync_service_ = nullptr;
 
-  bool default_apps_ready_ = false;  
-  base::OnceClosure default_apps_ready_callback_;  
+  bool default_apps_ready_ = false;
+  base::OnceClosure default_apps_ready_callback_;
 
   // TODO (b/70566216): Remove this once fixed.
   base::OnceClosure app_list_refreshed_callback_;
 
   // Keeps all pending resize requests used to support legacy icons.
   std::vector<std::unique_ptr<ResizeRequest>> resize_requests_;
-  std::map<std::string, AnboxAppInfo> app_list_;
+  // std::map<std::string, AnboxAppInfo> app_list_;
 
   base::WeakPtrFactory<AnboxAppListPrefs> weak_ptr_factory_{this};
 
