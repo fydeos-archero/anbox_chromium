@@ -174,6 +174,7 @@ vars = {
   'swiftshader_git': 'https://swiftshader.googlesource.com',
   'webrtc_git': 'https://webrtc.googlesource.com',
   'github_git': "https://github.com",
+  'fydeos_git': "https://gitlab.fydeos.xyz",
 
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling Skia
@@ -3507,11 +3508,8 @@ deps = {
 
   # === ANDROID_DEPS Generated Code End ===
 
-  'src/third_party/anbox': 
-    Var('github_git') + '/FydeOS-ArcHero/anbox_fydeos.git@master',
-
-  'src/third_party/boost':   
-    Var('github_git') + '/boostorg/boost.git@436ad1dfcfc7e0246141beddd11c8a4e9c10b146',    #1.65.1
+  'src/third_party/archero':
+    Var('fydeos_git') + '/arf/archero-device.git@dev',
 }
 
 
@@ -4368,13 +4366,6 @@ hooks = [
                 '-vpython-tool', 'install',
     ],
   },
-
-  # anbox patch
-  {
-    'name': 'anbox patch',
-    'pattern': '.',
-    'action': ['bash', 'src/build/anbox-patch.sh'],
-  }
 ]
 
 recursedeps = [
