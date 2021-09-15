@@ -22,6 +22,7 @@ enum class AppType {
   BROWSER,
   CHROME_APP,
   ARC_APP,
+  ARCHERO_APP,
   CROSTINI_APP,
   SYSTEM_APP,
   // TODO(crbug.com/1090663): Migrate this into BROWSER.

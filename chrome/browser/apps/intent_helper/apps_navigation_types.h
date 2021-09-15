@@ -72,6 +72,7 @@ enum class PickerEntryType {
   kWeb,
   kDevice,
   kMacOs,
+  kArcHero,
 };
 
 // Represents the data required to display an app in a picker to the user.

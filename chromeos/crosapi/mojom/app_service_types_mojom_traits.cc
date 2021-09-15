@@ -137,6 +137,8 @@ EnumTraits<crosapi::mojom::AppType, apps::mojom::AppType>::ToMojom(
       return crosapi::mojom::AppType::kUnknown;
     case apps::mojom::AppType::kArc:
       return crosapi::mojom::AppType::kArc;
+    case apps::mojom::AppType::kArcHero:
+      return crosapi::mojom::AppType::kArcHero;
     case apps::mojom::AppType::kWeb:
       return crosapi::mojom::AppType::kWeb;
     case apps::mojom::AppType::kSystemWeb:
@@ -163,6 +165,9 @@ bool EnumTraits<crosapi::mojom::AppType, apps::mojom::AppType>::FromMojom(
       return true;
     case crosapi::mojom::AppType::kArc:
       *output = apps::mojom::AppType::kArc;
+      return true;
+    case crosapi::mojom::AppType::kArcHero:
+      *output = apps::mojom::AppType::kArcHero;
       return true;
     case crosapi::mojom::AppType::kWeb:
       *output = apps::mojom::AppType::kWeb;

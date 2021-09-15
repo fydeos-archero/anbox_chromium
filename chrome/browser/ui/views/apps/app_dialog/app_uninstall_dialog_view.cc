@@ -152,6 +152,7 @@ void AppUninstallDialogView::InitializeView(Profile* profile,
       NOTREACHED();
       break;
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kArcHero:
 #if BUILDFLAG(IS_CHROMEOS_ASH)
       InitializeViewForArcApp(profile, app_id);
 #else

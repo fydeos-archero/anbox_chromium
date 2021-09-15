@@ -68,6 +68,7 @@ void OnIntentPickerClosed(
       break;
 #endif
     case PickerEntryType::kArc:
+    case PickerEntryType::kArcHero:
     case PickerEntryType::kDevice:
       NOTREACHED();
   }

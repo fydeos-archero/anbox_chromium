@@ -345,6 +345,9 @@ void SharesheetService::RecordUserActionMetrics(
     auto app_type = app_service_proxy_->AppRegistryCache().GetAppType(
         base::UTF16ToUTF8(target_name));
     switch (app_type) {
+      case apps::mojom::AppType::kArcHero:
+        LOG(INFO) << "=== SharesheetService::RecordUserActionMetrics ArcHero";
+        break;
       case apps::mojom::AppType::kArc:
         SharesheetMetrics::RecordSharesheetActionMetrics(
             SharesheetMetrics::UserAction::kArc);

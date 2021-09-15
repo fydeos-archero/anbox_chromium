@@ -36,6 +36,7 @@ enum class AppTypeName {
   kBorealis = 10,
   kSystemWeb = 11,
   kChromeBrowser = 12,
+  kArcHero = 13,
 
   // Add any new values above this one, and update kMaxValue to the highest
   // enumerator value.

@@ -49,6 +49,8 @@ apps::AppTypeName GetHistogrameAppType(apps::mojom::AppType app_type) {
       return apps::AppTypeName::kUnknown;
     case apps::mojom::AppType::kArc:
       return apps::AppTypeName::kArc;
+    case apps::mojom::AppType::kArcHero:
+      return apps::AppTypeName::kArcHero;
     case apps::mojom::AppType::kBuiltIn:
     case apps::mojom::AppType::kCrostini:
       return apps::AppTypeName::kUnknown;
@@ -236,6 +238,10 @@ void AppLaunchHandler::LaunchApp(apps::mojom::AppType app_type,
 
   switch (app_type) {
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kArcHero:
+      if (app_type == apps::mojom::AppType::kArcHero){
+        LOG(INFO) << "=== AppLaunchHandler::LaunchApp archero";
+      }
       LaunchArcApp(app_id, it->second);
       break;
     case apps::mojom::AppType::kExtension:

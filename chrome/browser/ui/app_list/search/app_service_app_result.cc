@@ -119,6 +119,10 @@ void AppServiceAppResult::GetContextMenuModel(GetMenuModelCallback callback) {
 ash::SearchResultType AppServiceAppResult::GetSearchResultType() const {
   switch (app_type_) {
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kArcHero:
+      if (app_type_ == apps::mojom::AppType::kArcHero){
+        LOG(INFO) << "=== AppServiceAppResult::GetSearchResultType archero";
+      }
       return ash::PLAY_STORE_APP;
     case apps::mojom::AppType::kBuiltIn:
       return ash::INTERNAL_APP;

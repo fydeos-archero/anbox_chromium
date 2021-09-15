@@ -528,6 +528,9 @@ extensions::LaunchType AppServiceShelfContextMenu::GetExtensionLaunchType()
 
 bool AppServiceShelfContextMenu::ShouldAddPinMenu() {
   switch (app_type_) {
+    case apps::mojom::AppType::kArcHero:
+      LOG(INFO) << "=== AppServiceShelfContextMenu::ShouldAddPinMenu archero";
+      return true;
     case apps::mojom::AppType::kArc: {
       const arc::ArcAppShelfId& arc_shelf_id =
           arc::ArcAppShelfId::FromString(item().id.app_id);

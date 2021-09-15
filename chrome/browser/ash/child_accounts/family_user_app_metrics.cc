@@ -37,6 +37,7 @@ constexpr char kEnabledExtensionsCountHistogramName[] =
 constexpr char kUnknownAppsCountHistogramName[] =
     "FamilyUser.UnknownAppsCount2";
 constexpr char kArcAppsCountHistogramName[] = "FamilyUser.ArcAppsCount2";
+constexpr char kArcHeroAppsCountHistogramName[] = "FamilyUser.ArcHeroAppsCount2";
 constexpr char kBuiltInAppsCountHistogramName[] =
     "FamilyUser.BuiltInAppsCount2";
 constexpr char kCrostiniAppsCountHistogramName[] =
@@ -63,6 +64,8 @@ const char* GetAppsCountHistogramName(apps::mojom::AppType app_type) {
       return kUnknownAppsCountHistogramName;
     case apps::mojom::AppType::kArc:
       return kArcAppsCountHistogramName;
+    case apps::mojom::AppType::kArcHero:
+      return kArcHeroAppsCountHistogramName;
     case apps::mojom::AppType::kBuiltIn:
       return kBuiltInAppsCountHistogramName;
     case apps::mojom::AppType::kCrostini:

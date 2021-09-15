@@ -94,6 +94,7 @@ enum AppType {
   kArc,                   // Android app.
   kBuiltIn,               // Built-in app.
   kCrostini,              // Linux (via Crostini) app.
+  kArcHero,
   kExtension,             // Extension-backed app.
   kWeb,                   // Web app.
   kMacOs,                 // Mac OS app.

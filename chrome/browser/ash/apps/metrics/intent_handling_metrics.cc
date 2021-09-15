@@ -119,6 +119,9 @@ IntentHandlingMetrics::PickerAction IntentHandlingMetrics::GetPickerAction(
           return PickerAction::PREFERRED_CHROME_BROWSER_FOUND;
         case PickerEntryType::kArc:
           return PickerAction::PREFERRED_ARC_ACTIVITY_FOUND;
+        case PickerEntryType::kArcHero:
+          LOG(INFO) << "==== IntentHandlingMetrics::GetPickerAction archero";
+          return PickerAction::INVALID;
         case PickerEntryType::kWeb:
           return PickerAction::PREFERRED_PWA_FOUND;
         case PickerEntryType::kDevice:
@@ -137,6 +140,9 @@ IntentHandlingMetrics::PickerAction IntentHandlingMetrics::GetPickerAction(
         case PickerEntryType::kArc:
           return should_persist ? PickerAction::ARC_APP_PREFERRED_PRESSED
                                 : PickerAction::ARC_APP_PRESSED;
+        case PickerEntryType::kArcHero:
+          LOG(INFO) << "==== IntentHandlingMetrics::GetPickerAction archero";
+          return PickerAction::INVALID;
         case PickerEntryType::kWeb:
           return should_persist ? PickerAction::PWA_APP_PREFERRED_PRESSED
                                 : PickerAction::PWA_APP_PRESSED;

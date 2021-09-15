@@ -31,6 +31,9 @@ apps::mojom::AppType GetAppType(apps::PickerEntryType picker_entry_type) {
     case apps::PickerEntryType::kArc:
       app_type = apps::mojom::AppType::kArc;
       break;
+    case apps::PickerEntryType::kArcHero:
+      app_type = apps::mojom::AppType::kArcHero;
+      break;
     case apps::PickerEntryType::kWeb:
       app_type = apps::mojom::AppType::kWeb;
       break;

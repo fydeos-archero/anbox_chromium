@@ -41,6 +41,8 @@ em::AppInfo::AppType ExtractAppType(const apps::mojom::AppType app_type) {
   switch (app_type) {
     case apps::mojom::AppType::kArc:
       return em::AppInfo::AppType::AppInfo_AppType_TYPE_ARC;
+    case apps::mojom::AppType::kArcHero:
+      return em::AppInfo::AppType::AppInfo_AppType_TYPE_ARCHERO;
     case apps::mojom::AppType::kBuiltIn:
       return em::AppInfo::AppType::AppInfo_AppType_TYPE_BUILTIN;
     case apps::mojom::AppType::kCrostini:

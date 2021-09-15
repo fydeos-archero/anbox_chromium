@@ -170,6 +170,8 @@ apps::AppTypeName GetAppTypeName(Profile* profile,
       return apps::AppTypeName::kUnknown;
     case apps::mojom::AppType::kArc:
       return apps::AppTypeName::kArc;
+    case apps::mojom::AppType::kArcHero:
+      return apps::AppTypeName::kArcHero;
     case apps::mojom::AppType::kBuiltIn:
       return apps::AppTypeName::kBuiltIn;
     case apps::mojom::AppType::kCrostini:
@@ -251,6 +253,8 @@ apps::AppTypeName GetAppTypeName(Profile* profile,
       return apps::AppTypeName::kUnknown;
     case apps::mojom::AppType::kArc:
       return apps::AppTypeName::kArc;
+    case apps::mojom::AppType::kArcHero:
+      return apps::AppTypeName::kArcHero;
     case apps::mojom::AppType::kBuiltIn:
       return apps::AppTypeName::kBuiltIn;
     case apps::mojom::AppType::kCrostini:
@@ -301,6 +305,7 @@ constexpr char kAppActivatedCount[] =
     "app_platform_metrics.app_activated_count";
 
 constexpr char kArcHistogramName[] = "Arc";
+constexpr char kArcHeroHistogramName[] = "ArcHero";
 constexpr char kBuiltInHistogramName[] = "BuiltIn";
 constexpr char kCrostiniHistogramName[] = "Crostini";
 constexpr char kChromeAppHistogramName[] = "ChromeApp";
@@ -319,6 +324,8 @@ std::string GetAppTypeHistogramName(apps::AppTypeName app_type_name) {
       return std::string();
     case apps::AppTypeName::kArc:
       return kArcHistogramName;
+    case apps::AppTypeName::kArcHero:
+      return kArcHeroHistogramName;
     case apps::AppTypeName::kBuiltIn:
       return kBuiltInHistogramName;
     case apps::AppTypeName::kCrostini:

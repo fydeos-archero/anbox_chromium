@@ -43,6 +43,10 @@ namespace {
 TaskType GetTaskType(apps::mojom::AppType app_type) {
   switch (app_type) {
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kArcHero:
+      if (app_type == apps::mojom::AppType::kArcHero){
+        LOG(INFO) << "=== GetTaskType archero";
+      }
       return TASK_TYPE_ARC_APP;
     case apps::mojom::AppType::kWeb:
     case apps::mojom::AppType::kSystemWeb:
