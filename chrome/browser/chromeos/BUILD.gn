@@ -21,6 +21,7 @@ source_set("chromeos") {
   assert(enable_extensions, "ChromeOS Chrome has to be built with extensions")
 
   configs += [ "//build/config/compiler:wexit_time_destructors" ]
+  configs += [ "//third_party/archero/libarchero:libarchero_headers" ]
 
   public_deps = [
     "//ash/resources/vector_icons",
@@ -824,6 +825,12 @@ source_set("chromeos") {
     "../ash/arc/session/arc_service_launcher.h",
     "../ash/arc/session/arc_session_manager.cc",
     "../ash/arc/session/arc_session_manager.h",
+
+    "../ash/arc/session/archero_service_launcher.cc",
+    "../ash/arc/session/archero_service_launcher.h",
+    "../ash/arc/session/archero_session_manager.cc",
+    "../ash/arc/session/archero_session_manager.h",
+
     "../ash/arc/session/arc_session_manager_observer.h",
     "../ash/arc/sharesheet/arc_sharesheet_bridge.cc",
     "../ash/arc/sharesheet/arc_sharesheet_bridge.h",
@@ -2230,6 +2237,10 @@ source_set("chromeos") {
     "file_manager/app_service_file_tasks.h",
     "file_manager/arc_file_tasks.cc",
     "file_manager/arc_file_tasks.h",
+
+    "file_manager/archero_file_tasks.cc",
+    "file_manager/archero_file_tasks.h",
+
     "file_manager/documents_provider_root_manager.cc",
     "file_manager/documents_provider_root_manager.h",
     "file_manager/file_browser_handlers.cc",

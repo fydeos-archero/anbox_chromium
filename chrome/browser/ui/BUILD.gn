@@ -1685,6 +1685,8 @@ static_library("ui") {
   }
 
   if (is_chromeos_ash) {
+    configs += [ "//third_party/archero/libarchero:libarchero_headers" ]
+
     assert(enable_extensions)
     assert(enable_supervised_users)
     assert(toolkit_views)
@@ -1737,6 +1739,12 @@ static_library("ui") {
       "app_list/arc/arc_app_list_prefs.h",
       "app_list/arc/arc_app_list_prefs_factory.cc",
       "app_list/arc/arc_app_list_prefs_factory.h",
+
+      "app_list/arc/archero_app_list_prefs.cc",
+      "app_list/arc/archero_app_list_prefs.h",
+      "app_list/arc/archero_app_list_prefs_factory.cc",
+      "app_list/arc/archero_app_list_prefs_factory.h",
+
       "app_list/arc/arc_app_scoped_pref_update.cc",
       "app_list/arc/arc_app_scoped_pref_update.h",
       "app_list/arc/arc_app_utils.cc",
@@ -1756,6 +1764,8 @@ static_library("ui") {
       "app_list/arc/arc_pai_starter.h",
       "app_list/arc/arc_playstore_app_context_menu.cc",
       "app_list/arc/arc_playstore_app_context_menu.h",
+      "app_list/arc/archero_app_context_menu.cc",
+      "app_list/arc/archero_app_context_menu.h",
       "app_list/arc/arc_usb_host_permission_manager.cc",
       "app_list/arc/arc_usb_host_permission_manager.h",
       "app_list/arc/arc_usb_host_permission_manager_factory.cc",
@@ -2054,6 +2064,8 @@ static_library("ui") {
       "ash/sharesheet/sharesheet_util.h",
       "ash/shelf/app_service/app_service_app_window_arc_tracker.cc",
       "ash/shelf/app_service/app_service_app_window_arc_tracker.h",
+      "ash/shelf/app_service/app_service_app_window_archero_tracker.cc",
+      "ash/shelf/app_service/app_service_app_window_archero_tracker.h",
       "ash/shelf/app_service/app_service_app_window_crostini_tracker.cc",
       "ash/shelf/app_service/app_service_app_window_crostini_tracker.h",
       "ash/shelf/app_service/app_service_app_window_shelf_controller.cc",
@@ -2078,6 +2090,8 @@ static_library("ui") {
       "ash/shelf/app_window_shelf_item_controller.h",
       "ash/shelf/arc_app_shelf_id.cc",
       "ash/shelf/arc_app_shelf_id.h",
+      "ash/shelf/archero_app_window.cc",
+      "ash/shelf/archero_app_window.h",
       "ash/shelf/arc_app_window.cc",
       "ash/shelf/arc_app_window.h",
       "ash/shelf/arc_app_window_delegate.h",
