@@ -40,6 +40,11 @@ UninstallDialog::UninstallDialog(Profile* profile,
 
   switch (app_type) {
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kArcHero:
+      if (app_type == apps::mojom::AppType::kArcHero){
+        LOG(INFO) << "=== UninstallDialog::UninstallDialog archero";
+      }
+      break;
     case apps::mojom::AppType::kBorealis:
     case apps::mojom::AppType::kPluginVm:
       break;
