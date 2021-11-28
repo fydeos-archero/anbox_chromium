@@ -208,6 +208,7 @@ bool AppServiceContextMenu::IsCommandIdChecked(int command_id) const {
       return AppContextMenu::IsCommandIdChecked(command_id);
 
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kArcHero:
       FALLTHROUGH;
     case apps::mojom::AppType::kCrostini:
       FALLTHROUGH;
@@ -336,6 +337,7 @@ void AppServiceContextMenu::SetLaunchType(int command_id) {
       return;
     }
     case apps::mojom::AppType::kArc:
+    case apps::mojom::AppType::kArcHero:
       FALLTHROUGH;
     case apps::mojom::AppType::kCrostini:
       FALLTHROUGH;
