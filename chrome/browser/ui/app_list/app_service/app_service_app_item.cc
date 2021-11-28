@@ -22,6 +22,7 @@
 #include "chrome/browser/ui/app_list/app_service/app_service_context_menu.h"
 #include "chrome/browser/ui/ash/shelf/chrome_shelf_controller.h"
 #include "chrome/common/chrome_features.h"
+#include "chrome/browser/ui/app_list/arc/archero_app_context_menu.h"
 
 // static
 const char AppServiceAppItem::kItemType[] = "AppServiceAppItem";
@@ -129,8 +130,14 @@ const char* AppServiceAppItem::GetItemType() const {
 }
 
 void AppServiceAppItem::GetContextMenuModel(GetMenuModelCallback callback) {
-  context_menu_ = std::make_unique<AppServiceContextMenu>(this, profile(), id(),
+  if (app_type_ == apps::mojom::AppType::kArcHero){
+    context_menu_ = std::make_unique<ArcHeroAppContextMenu>(this, profile(),
+                                       GetController());
+
+  }else{
+    context_menu_ = std::make_unique<AppServiceContextMenu>(this, profile(), id(),
                                                           GetController());
+  }
 
   context_menu_->GetMenuModel(std::move(callback));
 }
