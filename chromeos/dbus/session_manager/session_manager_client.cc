@@ -193,6 +193,17 @@ class SessionManagerClientImpl : public SessionManagerClient {
 
   bool IsScreenLocked() const override { return screen_is_locked_; }
 
+  void StartArcHeroContainer(VoidDBusMethodCallback callback) override {
+    DCHECK(!callback.is_null());
+    dbus::MethodCall method_call(
+        login_manager::kSessionManagerInterface, "StartArcHeroContainer");
+
+    session_manager_proxy_->CallMethod(
+        &method_call, kStartArcTimeout,
+        base::BindOnce(&SessionManagerClientImpl::OnVoidMethod,
+                       weak_ptr_factory_.GetWeakPtr(), std::move(callback)));
+  }
+
   void EmitLoginPromptVisible() override {
     SimpleMethodCallToSessionManager(
         login_manager::kSessionManagerEmitLoginPromptVisible);

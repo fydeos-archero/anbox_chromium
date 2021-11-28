@@ -169,6 +169,8 @@ class COMPONENT_EXPORT(SESSION_MANAGER) SessionManagerClient {
                           RestartJobReason reason,
                           VoidDBusMethodCallback callback) = 0;
 
+  virtual void StartArcHeroContainer(VoidDBusMethodCallback callback) = 0;
+
   // Sends the user's password to the session manager.
   virtual void SaveLoginPassword(const std::string& password) = 0;
 
