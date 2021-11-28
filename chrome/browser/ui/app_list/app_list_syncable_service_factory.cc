@@ -13,6 +13,7 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/app_list/app_list_syncable_service.h"
 #include "chrome/browser/ui/app_list/arc/arc_app_list_prefs_factory.h"
+#include "chrome/browser/ui/app_list/arc/archero_app_list_prefs_factory.h"
 #include "components/keyed_service/content/browser_context_dependency_manager.h"
 #include "components/prefs/pref_service.h"
 #include "extensions/browser/extension_system_provider.h"
@@ -63,6 +64,7 @@ AppListSyncableServiceFactory::AppListSyncableServiceFactory()
   dependent_factories.insert(
       extensions::ExtensionsBrowserClient::Get()->GetExtensionSystemFactory());
   dependent_factories.insert(ArcAppListPrefsFactory::GetInstance());
+  dependent_factories.insert(ArcHeroAppListPrefsFactory::GetInstance());
   dependent_factories.insert(apps::AppServiceProxyFactory::GetInstance());
   for (FactorySet::iterator it = dependent_factories.begin();
        it != dependent_factories.end();
