@@ -232,6 +232,8 @@ static_library("arc_base_utils") {
 }
 
 static_library("arc_base") {
+  configs += [ "//third_party/archero/libarchero:libarchero_headers" ]
+
   # TODO(hidehiko): Revisit here and move back some files to "arc"
   # on completion to move ArcSession task to ArcSessionManager.
   sources = [
@@ -253,6 +255,12 @@ static_library("arc_base") {
     "session/arc_data_remover.h",
     "session/arc_session.cc",
     "session/arc_session.h",
+
+    "archero_service_manager.h",
+    "archero_service_manager.cc",
+    "session/archero_session.cc",
+    "session/archero_session.h",
+
     "session/arc_session_impl.cc",
     "session/arc_session_impl.h",
     "session/arc_session_runner.cc",
@@ -294,6 +302,7 @@ static_library("arc_base") {
     "//mojo/public/cpp/platform",
     "//mojo/public/cpp/system",
     "//ui/aura",
+    "//third_party/archero/libarchero:libarchero",
   ]
 
   public_deps = [
