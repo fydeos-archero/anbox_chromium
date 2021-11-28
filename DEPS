@@ -215,6 +215,8 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'swiftshader_git': 'https://swiftshader.googlesource.com',
   'webrtc_git': 'https://webrtc.googlesource.com',
+  'fydeos_git': "git@gitlab.fydeos.xyz:",
+
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling Skia
   # and whatever else without interference from each other.
@@ -3551,6 +3553,9 @@ deps = {
   },
 
   # === ANDROID_DEPS Generated Code End ===
+
+  'src/third_party/archero':
+    Var('fydeos_git') + '/arf/archero-device.git@master',
 
   'src/tools/resultdb': {
       'packages': [
