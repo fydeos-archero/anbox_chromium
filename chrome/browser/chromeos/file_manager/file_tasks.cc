@@ -30,6 +30,7 @@
 #include "chrome/browser/chromeos/file_manager/app_id.h"
 #include "chrome/browser/chromeos/file_manager/app_service_file_tasks.h"
 #include "chrome/browser/chromeos/file_manager/arc_file_tasks.h"
+#include "chrome/browser/chromeos/file_manager/archero_file_tasks.h"
 #include "chrome/browser/chromeos/file_manager/file_browser_handlers.h"
 #include "chrome/browser/chromeos/file_manager/file_tasks_notifier.h"
 #include "chrome/browser/chromeos/file_manager/fileapi_util.h"
@@ -89,6 +90,7 @@ namespace {
 const char kFileBrowserHandlerTaskType[] = "file";
 const char kFileHandlerTaskType[] = "app";
 const char kArcAppTaskType[] = "arc";
+const char kArcHeroAppTaskType[] = "archero";
 const char kCrostiniAppTaskType[] = "crostini";
 const char kPluginVmAppTaskType[] = "pluginvm";
 const char kWebAppTaskType[] = "web";
@@ -104,6 +106,8 @@ std::string TaskTypeToString(TaskType task_type) {
       return kFileHandlerTaskType;
     case TASK_TYPE_ARC_APP:
       return kArcAppTaskType;
+    case TASK_TYPE_ARCHERO_APP:
+      return kArcHeroAppTaskType;
     case TASK_TYPE_CROSTINI_APP:
       return kCrostiniAppTaskType;
     case TASK_TYPE_WEB_APP:
@@ -127,6 +131,8 @@ TaskType StringToTaskType(const std::string& str) {
     return TASK_TYPE_FILE_HANDLER;
   if (str == kArcAppTaskType)
     return TASK_TYPE_ARC_APP;
+  if (str == kArcHeroAppTaskType)
+    return TASK_TYPE_ARCHERO_APP;
   if (str == kCrostiniAppTaskType)
     return TASK_TYPE_CROSTINI_APP;
   if (str == kWebAppTaskType)
@@ -294,6 +300,16 @@ GURL GetIconURL(Profile* profile, const Extension& extension) {
       false);  // grayscale
 }
 
+void ExecuteByArcHeroAfterMimeTypesCollected(
+    Profile* profile,
+    const TaskDescriptor& task,
+    const std::vector<FileSystemURL>& file_urls,
+    FileTaskFinishedCallback done,
+    extensions::app_file_handler_util::MimeTypeCollector* mime_collector,
+    std::unique_ptr<std::vector<std::string>> mime_types) {
+  ExecuteArcHeroTask(profile, task, file_urls, *mime_types, std::move(done));
+}
+
 void ExecuteByArcAfterMimeTypesCollected(
     Profile* profile,
     const TaskDescriptor& task,
@@ -321,6 +337,7 @@ void PostProcessFoundTasks(
     const std::vector<extensions::EntryInfo>& entries,
     FindTasksCallback callback,
     std::unique_ptr<std::vector<FullTaskDescriptor>> result_list) {
+
   // Google documents can only be handled by internal handlers.
   if (ContainsGoogleDocument(entries))
     KeepOnlyFileManagerInternalTasks(result_list.get());
@@ -525,6 +542,16 @@ bool ExecuteFileTask(Profile* profile,
         new extensions::app_file_handler_util::MimeTypeCollector(profile);
     mime_collector->CollectForURLs(
         file_urls, base::BindOnce(&ExecuteByArcAfterMimeTypesCollected, profile,
+                                  task, file_urls, std::move(done),
+                                  base::Owned(mime_collector)));
+    return true;
+  }
+
+  if (task.task_type == TASK_TYPE_ARCHERO_APP) {
+    extensions::app_file_handler_util::MimeTypeCollector* mime_collector =
+        new extensions::app_file_handler_util::MimeTypeCollector(profile);
+    mime_collector->CollectForURLs(
+        file_urls, base::BindOnce(&ExecuteByArcHeroAfterMimeTypesCollected, profile,
                                   task, file_urls, std::move(done),
                                   base::Owned(mime_collector)));
     return true;
@@ -801,7 +828,7 @@ void FindFileBrowserHandlerTasks(
   }
 }
 
-void FindExtensionAndAppTasks(
+void FindExtensionAndAppTasks2(
     Profile* profile,
     const std::vector<extensions::EntryInfo>& entries,
     const std::vector<GURL>& file_urls,
@@ -834,6 +861,18 @@ void FindExtensionAndAppTasks(
                    base::BindOnce(PostProcessFoundTasks, profile, entries,
                                   std::move(callback), std::move(result_list)));
 }
+
+void FindExtensionAndAppTasks(
+    Profile* profile,
+    const std::vector<extensions::EntryInfo>& entries,
+    const std::vector<GURL>& file_urls,
+    FindTasksCallback callback,
+    std::unique_ptr<std::vector<FullTaskDescriptor>> result_list) {
+
+  FindArcHeroTasks(profile, entries, file_urls, std::move(result_list), base::BindOnce(&FindExtensionAndAppTasks2, profile, entries,
+                              file_urls, std::move(callback)));
+}
+
 
 void FindAllTypesOfTasks(Profile* profile,
                          const std::vector<extensions::EntryInfo>& entries,
