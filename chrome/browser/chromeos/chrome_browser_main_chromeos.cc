@@ -49,6 +49,7 @@
 #include "chrome/browser/ash/app_mode/web_app/web_kiosk_app_manager.h"
 #include "chrome/browser/ash/arc/enterprise/arc_data_snapshotd_delegate.h"
 #include "chrome/browser/ash/arc/session/arc_service_launcher.h"
+#include "chrome/browser/ash/arc/session/archero_service_launcher.h"
 #include "chrome/browser/ash/crosapi/browser_data_migrator.h"
 #include "chrome/browser/ash/crosapi/browser_manager.h"
 #include "chrome/browser/ash/crosapi/crosapi_manager.h"
@@ -657,6 +658,8 @@ int ChromeBrowserMainPartsChromeos::PreMainMessageLoopRun() {
 
   g_browser_process->platform_part()->InitializeSchedulerConfigurationManager();
   arc_service_launcher_ = std::make_unique<arc::ArcServiceLauncher>(
+      g_browser_process->platform_part()->scheduler_configuration_manager());
+  archero_service_launcher_ = std::make_unique<archero::ArcHeroServiceLauncher>(
       g_browser_process->platform_part()->scheduler_configuration_manager());
 
   g_browser_process->platform_part()->InitializeKernelFeatureManager();

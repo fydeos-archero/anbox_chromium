@@ -49,6 +49,10 @@ class ArcDataSnapshotdManager;
 class ArcServiceLauncher;
 }  // namespace arc
 
+namespace archero{
+class ArcHeroServiceLauncher;
+}
+
 namespace ash {
 class AccessibilityEventRewriterDelegateImpl;
 }
@@ -167,6 +171,7 @@ class ChromeBrowserMainPartsChromeos : public ChromeBrowserMainPartsLinux {
   scoped_refptr<chromeos::ExternalMetrics> external_metrics_;
 
   std::unique_ptr<arc::ArcServiceLauncher> arc_service_launcher_;
+  std::unique_ptr<archero::ArcHeroServiceLauncher> archero_service_launcher_;
 
   std::unique_ptr<ImageDownloaderImpl> image_downloader_;
 
