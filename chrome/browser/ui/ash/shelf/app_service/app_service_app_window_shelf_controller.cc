@@ -27,6 +27,7 @@
 #include "chrome/browser/ui/ash/multi_user/multi_user_util.h"
 #include "chrome/browser/ui/ash/multi_user/multi_user_window_manager_helper.h"
 #include "chrome/browser/ui/ash/shelf/app_service/app_service_app_window_arc_tracker.h"
+#include "chrome/browser/ui/ash/shelf/app_service/app_service_app_window_archero_tracker.h"
 #include "chrome/browser/ui/ash/shelf/app_service/app_service_app_window_crostini_tracker.h"
 #include "chrome/browser/ui/ash/shelf/app_service/app_service_app_window_shelf_item_controller.h"
 #include "chrome/browser/ui/ash/shelf/app_window_base.h"
@@ -78,6 +79,8 @@ AppServiceAppWindowShelfController::AppServiceAppWindowShelfController(
 
   if (arc::IsArcAllowedForProfile(owner->profile()))
     arc_tracker_ = std::make_unique<AppServiceAppWindowArcTracker>(this);
+
+  archero_tracker_ = std::make_unique<AppServiceAppWindowArcHeroTracker>(this);
 
   if (crostini::CrostiniFeatures::Get()->CouldBeAllowed(owner->profile())) {
     crostini_tracker_ =
@@ -154,6 +157,8 @@ void AppServiceAppWindowShelfController::ActiveUserChanged(
   app_service_instance_helper_->ActiveUserChanged();
   if (arc_tracker_)
     arc_tracker_->ActiveUserChanged(user_email);
+
+  archero_tracker_->ActiveUserChanged(user_email);
 }
 
 void AppServiceAppWindowShelfController::AdditionalUserAddedToSession(
@@ -181,6 +186,9 @@ void AppServiceAppWindowShelfController::OnWindowInitialized(
   observed_windows_.AddObservation(window);
   if (arc_tracker_)
     arc_tracker_->AddCandidateWindow(window);
+
+  if (archero_tracker_)
+    archero_tracker_->AddCandidateWindow(window);
 }
 
 void AppServiceAppWindowShelfController::OnWindowPropertyChanged(
@@ -214,6 +222,9 @@ void AppServiceAppWindowShelfController::OnWindowVisibilityChanged(
 
   if (arc_tracker_)
     arc_tracker_->HandleWindowVisibilityChanged(window);
+
+  if (archero_tracker_)
+    archero_tracker_->HandleWindowVisibilityChanged(window);
 
   ash::ShelfID shelf_id = GetShelfId(window);
   if (shelf_id.IsNull())
@@ -260,6 +271,8 @@ void AppServiceAppWindowShelfController::OnWindowDestroying(
   observed_windows_.RemoveObservation(window);
   if (arc_tracker_)
     arc_tracker_->RemoveCandidateWindow(window);
+  if (archero_tracker_)
+    archero_tracker_->RemoveCandidateWindow(window);
   if (crostini_tracker_)
     crostini_tracker_->OnWindowDestroying(window);
 
@@ -297,6 +310,12 @@ void AppServiceAppWindowShelfController::OnWindowDestroying(
     return;
   }
 
+  if (archero_tracker_ && arc::GetWindowTaskId(window) != arc::kNoTaskId) {
+    archero_tracker_->HandleWindowDestroying(window);
+    aura_window_to_app_window_.erase(window);
+    return;
+  }
+
   auto app_window_it = aura_window_to_app_window_.find(window);
   if (app_window_it == aura_window_to_app_window_.end())
     return;
@@ -313,7 +332,10 @@ void AppServiceAppWindowShelfController::OnWindowActivated(
   AppWindowShelfController::OnWindowActivated(reason, new_active, old_active);
 
   if (arc_tracker_)
-    arc_tracker_->OnTaskSetActive(arc_tracker_->active_task_id());
+    arc_tracker_->OnTaskSetActive(archero_tracker_->active_task_id());
+
+  if (archero_tracker_)
+    archero_tracker_->OnTaskSetActive(archero_tracker_->active_task_id());
 
   SetWindowActivated(new_active, /*active*/ true);
   SetWindowActivated(old_active, /*active*/ false);
@@ -398,6 +420,10 @@ void AppServiceAppWindowShelfController::OnInstanceRegistryWillBeDestroyed(
 int AppServiceAppWindowShelfController::GetActiveTaskId() const {
   if (arc_tracker_)
     return arc_tracker_->active_task_id();
+
+  if (archero_tracker_)
+    return archero_tracker_->active_task_id();
+
   return arc::kNoTaskId;
 }
 
@@ -513,6 +539,11 @@ void AppServiceAppWindowShelfController::RegisterWindow(
     return;
   }
 
+  if (archero_tracker_ && arc::GetWindowTaskId(window) != arc::kNoTaskId) {
+    archero_tracker_->AttachControllerToWindow(window);
+    return;
+  }
+
   // The window for ARC Play Store is a special window, which is created by
   // both Extensions and ARC. If Extensions's window is generated after
   // ARC window, calls OnItemDelegateDiscarded to remove the ARC apps
@@ -609,6 +640,9 @@ void AppServiceAppWindowShelfController::OnItemDelegateDiscarded(
     if (arc_tracker_)
       arc_tracker_->OnItemDelegateDiscarded(app_window->shelf_id(), delegate);
 
+    if (archero_tracker_)
+      archero_tracker_->OnItemDelegateDiscarded(app_window->shelf_id(), delegate);
+
     if (!app_window || app_window->controller() != delegate)
       continue;
 
@@ -648,6 +682,9 @@ ash::ShelfID AppServiceAppWindowShelfController::GetShelfId(
   ash::ShelfID shelf_id;
   if (arc_tracker_)
     shelf_id = arc_tracker_->GetShelfId(arc::GetWindowTaskId(window));
+
+  if (archero_tracker_)
+    shelf_id = archero_tracker_->GetShelfId(arc::GetWindowTaskId(window));
 
   if (!shelf_id.IsNull())
     return shelf_id;

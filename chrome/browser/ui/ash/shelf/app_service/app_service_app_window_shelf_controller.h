@@ -27,6 +27,7 @@ class InstanceUpdate;
 
 class AppServiceAppWindowCrostiniTracker;
 class AppServiceAppWindowArcTracker;
+class AppServiceAppWindowArcHeroTracker;
 class AppWindowBase;
 class ChromeShelfController;
 class Profile;
@@ -147,6 +148,7 @@ class AppServiceAppWindowShelfController
   std::unique_ptr<AppServiceInstanceRegistryHelper>
       app_service_instance_helper_;
   std::unique_ptr<AppServiceAppWindowArcTracker> arc_tracker_;
+  std::unique_ptr<AppServiceAppWindowArcHeroTracker> archero_tracker_;
   std::unique_ptr<AppServiceAppWindowCrostiniTracker> crostini_tracker_;
 
   // A list of profiles which we additionally observe.
