@@ -152,9 +152,15 @@ void AppUninstallDialogView::InitializeView(Profile* profile,
       NOTREACHED();
       break;
     case apps::mojom::AppType::kArc:
-    case apps::mojom::AppType::kArcHero:
 #if BUILDFLAG(IS_CHROMEOS_ASH)
       InitializeViewForArcApp(profile, app_id);
+#else
+      NOTREACHED();
+#endif
+      break;
+    case apps::mojom::AppType::kArcHero:
+#if BUILDFLAG(IS_CHROMEOS_ASH)
+      InitializeViewForArcHeroApp(profile, app_id);
 #else
       NOTREACHED();
 #endif
@@ -309,6 +315,33 @@ void AppUninstallDialogView::InitializeViewForArcApp(
     InitializeViewWithMessage(l10n_util::GetStringUTF16(
         IDS_ARC_APP_UNINSTALL_PROMPT_DATA_REMOVAL_WARNING));
   }
+}
+
+void AppUninstallDialogView::InitializeViewForArcHeroApp(
+    Profile* profile,
+    const std::string& app_id) {
+  LOG(INFO) << "=== AppUninstallDialogView::InitializeViewForArcHeroApp"    ;
+  // ArcHeroAppListPrefs* arc_prefs = ArcHeroAppListPrefs::Get(profile);
+  // DCHECK(arc_prefs);
+
+  // std::unique_ptr<ArcHeroAppListPrefs::AppInfo> app_info =
+  //     arc_prefs->GetApp(app_id);
+  // DCHECK(app_info);
+
+  // shortcut_ = app_info->shortcut;
+
+  // if (shortcut_) {
+  //   DialogDelegate::SetButtonLabel(
+  //       ui::DIALOG_BUTTON_OK,
+  //       l10n_util::GetStringUTF16(IDS_EXTENSION_PROMPT_UNINSTALL_BUTTON));
+  // } else {
+  //   base::string16 subheading_text = l10n_util::GetStringUTF16(
+  //       IDS_ARC_APP_UNINSTALL_PROMPT_DATA_REMOVAL_WARNING);
+  //   auto* label = AddChildView(std::make_unique<views::Label>(subheading_text));
+  //   label->SetMultiLine(true);
+  //   label->SetHorizontalAlignment(gfx::ALIGN_LEFT);
+  //   label->SetAllowCharacterBreak(true);
+  // }
 }
 
 void AppUninstallDialogView::InitializeViewWithMessage(

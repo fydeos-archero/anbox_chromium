@@ -53,6 +53,7 @@ class AppUninstallDialogView : public apps::UninstallDialog::UiBase,
   void InitializeViewForWebApp(Profile* profile, const std::string& app_id);
 #if BUILDFLAG(IS_CHROMEOS_ASH)
   void InitializeViewForArcApp(Profile* profile, const std::string& app_id);
+  void InitializeViewForArcHeroApp(Profile* profile, const std::string& app_id);
   void InitializeViewWithMessage(const std::u16string& message);
 #endif
 
