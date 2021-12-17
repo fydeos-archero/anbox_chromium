@@ -19,7 +19,12 @@
 #include "chrome/browser/chromeos/file_manager/app_id.h"
 #include "chrome/browser/chromeos/file_manager/fileapi_util.h"
 #include "net/base/io_buffer.h"
+// [AUD] Remove old audio arch ++
+#ifdef OLD_AUDIO_ARCH
 #include "media/audio/simple_sources.h"
+#endif
+// [AUD] Remove old audio arch --
+
 
 #define USE_PROTOBUF_CALLBACK_HEADER
 
@@ -27,6 +32,8 @@
 
 namespace arc{
 
+// [AUD] Remove old audio arch ++
+#ifdef OLD_AUDIO_ARCH
 class AudioServer:
   public archero::ArcHeroAudio,
   public media::AudioOutputStream::AudioSourceCallback,
@@ -158,6 +165,7 @@ private:
   base::Lock lock_;
   std::vector<std::uint8_t> buffer_queue_;
 };
+#endif
 
 // class PlatformMessageProcessor2:
 //   public archero::rpc::MessageProcessor {
@@ -265,8 +273,13 @@ void ArcHeroSession::Initialize(Profile* profile){
   // mkdir("/run/chrome/archero/",        S_IRWXU|S_IRGRP|S_IWGRP|S_IRWXO);
   // mkdir("/run/chrome/archero/sockets", S_IRWXU|S_IRGRP|S_IWGRP|S_IRWXO);
 
+  // [AUD] Remove old audio arch ++
+#ifdef OLD_AUDIO_ARCH
   audio_server_ = std::make_shared<AudioServer>();
   audio_server_->Initialize();
+#endif
+  // [AUD] Remove old audio arch --
+
   // audio_server_ = std::make_shared<AudioServer>(rt_);
   // audio_server_->Initialize();
 
