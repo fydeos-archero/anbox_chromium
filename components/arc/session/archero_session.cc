@@ -23,8 +23,6 @@
 
 #define USE_PROTOBUF_CALLBACK_HEADER
 
-#include "chromeos/dbus/session_manager/session_manager_client.h"
-
 namespace arc{
 
 class AudioServer:
@@ -296,6 +294,8 @@ void ArcHeroSession::Initialize(Profile* profile){
   chromeos::SessionManagerClient::Get()->StartArcHeroContainer(
     base::BindOnce(&ArcHeroSession::OnArcHeroInstanceStarted, weak_factory_.GetWeakPtr())
   );
+
+  chromeos::SessionManagerClient::Get()->AddObserver(this);
 }
 
 bool ArcHeroSession::LaunchApp(std::string &name, std::string &package, std::string &component){
@@ -403,6 +403,14 @@ void ArcHeroSession::Close(int task_id){
   LOG(INFO) << "====== ArcHeroSession::Close " << task_id;
 
   //
+}
+
+void ArcHeroSession::ArcInstanceStopped(login_manager::ArcContainerStopReason reason){
+  LOG(INFO) << "===== ArcHeroSession::ArcInstanceStopped: " << (int)reason;
+
+  chromeos::SessionManagerClient::Get()->StartArcHeroContainer(
+    base::BindOnce(&ArcHeroSession::OnArcHeroInstanceStarted, weak_factory_.GetWeakPtr())
+  );
 }
 
 }

@@ -15,6 +15,7 @@
 #include "content/browser/browser_main_loop.h"
 #include "media/audio/audio_manager.h"
 #include "media/audio/audio_io.h"
+#include "chromeos/dbus/session_manager/session_manager_client.h"
 
 #include "archero_bridge.h"
 #include "archero_audio.h"
@@ -35,7 +36,8 @@ class AudioServer;
 
 class ArcHeroSession:
   public archero::ArcHeroBridge,
-  public std::enable_shared_from_this<ArcHeroSession> {
+  public std::enable_shared_from_this<ArcHeroSession>,
+  public chromeos::SessionManagerClient::Observer {
 public:
   ArcHeroSession():archero::ArcHeroBridge(CAPACITY_BRIDGE_DETECT_APP|CAPACITY_BRIDGE_DETECT_WINDOW){}
 
@@ -50,9 +52,11 @@ public:
     LOG(INFO) << "====== ArcHeroSession::OnArcHeroInstanceStarted " << result;
   }
 
+  void ArcInstanceStopped(login_manager::ArcContainerStopReason reason) override;
+
 private:
   std::shared_ptr<AudioServer> audio_server_;
-  base::ObserverList<Observer>::Unchecked observer_list_;
+  // base::ObserverList<Observer>::Unchecked observer_list_;
 
   mutable std::mutex mutex_;
 
