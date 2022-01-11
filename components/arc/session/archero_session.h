@@ -18,7 +18,11 @@
 #include "chromeos/dbus/session_manager/session_manager_client.h"
 
 #include "archero_bridge.h"
+// [AUD] Remove old audio arch ++
+#ifdef OLD_AUDIO_ARCH
 #include "archero_audio.h"
+#endif
+// [AUD] Remove old audio arch --
 
 class Profile;
 
@@ -26,13 +30,22 @@ namespace storage{
 class FileSystemURL;
 }
 
+
+// [AUD] Remove old audio arch ++
+#ifdef OLD_AUDIO_ARCH
 namespace media{
 class AudioOutputStream;
 }
+#endif
+// [AUD] Remove old audio arch --
 
 namespace arc {
 
+// [AUD] Remove old audio arch ++
+#ifdef OLD_AUDIO_ARCH
 class AudioServer;
+#endif
+// [AUD] Remove old audio arch --
 
 class ArcHeroSession:
   public archero::ArcHeroBridge,
@@ -55,7 +68,11 @@ public:
   void ArcInstanceStopped(login_manager::ArcContainerStopReason reason) override;
 
 private:
+// [AUD] Remove old audio arch ++
+#ifdef OLD_AUDIO_ARCH
   std::shared_ptr<AudioServer> audio_server_;
+#endif
+// [AUD] Remove old audio arch --
   // base::ObserverList<Observer>::Unchecked observer_list_;
 
   mutable std::mutex mutex_;
