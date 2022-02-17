@@ -83,12 +83,19 @@ public:
       // Create runtime app entry that is valid for the current user session. This
       // entry is not shown in App Launcher and only required for shelf
       // integration.
-      AddAppAndShortcut(name.value_or(std::string()), package_name, activity,
+
+      file_task_runner_->PostTask(FROM_HERE,
+        base::BindOnce(
+          &ArcHeroAppListPrefs::AddAppAndShortcut,
+          weak_ptr_factory_.GetWeakPtr(),
+          name.value_or(std::string()), package_name, activity,
                         std::string() /* intent_uri */,
                         std::string() /* icon_resource_id */, false /* sticky */,
                         false /* notifications_enabled */, true /* app_ready */,
                         false /* suspended */, false /* shortcut */,
-                        false /* launchable */);
+                        false /* launchable */
+        )
+      );
     }
   }
 
